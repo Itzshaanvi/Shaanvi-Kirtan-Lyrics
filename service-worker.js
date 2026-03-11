@@ -63,3 +63,9 @@ self.addEventListener('fetch', event => {
   );
 });
 
+searchInput.addEventListener("keypress", (e) => {
+    if(e.key === "Enter") e.preventDefault(); // prevents form submit
+});
+
+
+
