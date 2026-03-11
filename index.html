@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kirtan Lyrics</title>
+<link rel="manifest" href="manifest.json">
+
+<style>
+*{box-sizing:border-box;}
+body{margin:0;font-family:cursive;background:#f5f5f5;}
+header{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;padding:20px;}
+button, select, input{border-radius:12px;border:1px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.25);backdrop-filter:blur(10px);padding:8px 12px;font-family:cursive;cursor:pointer;transition:0.3s;}
+button:hover, select:hover, input:hover{background:rgba(255,255,255,0.4);}
+#content{max-width:900px;margin:auto;padding:20px;display:flex;flex-direction:column;gap:12px;}
+.box{display:flex;justify-content:space-between;align-items:center;padding:16px;border-radius:16px;background:rgba(255,255,255,0.35);backdrop-filter:blur(12px);cursor:pointer;}
+.boxTitle{font-size:20px;font-weight:bold;}
+.boxButtons{display:flex;gap:6px;}
+.fullView h2{font-size:28px;}
+.fullView p{white-space:pre-line;font-size:20px;line-height:1.7;}
+.presentation p{font-size:42px;text-align:center;line-height:1.8;}
+.form{background:white;padding:20px;border-radius:16px;display:flex;flex-direction:column;gap:10px;}
+textarea{height:160px;resize:vertical;}
+#search{display:none;}
+</style>
+</head>
+<body>
+
+<header>
+<h1 onclick="location.reload()">Kirtan Lyrics</h1>
+
+<select id="typeSelect">
+<option value="">Type</option>
+<option value="Kirtan">Kirtan</option>
+<option value="Aarti">Aarti</option>
+<option value="Mantras">Mantras</option>
+<option value="Pooja">Pooja</option>
+<option value="Songs/Ghazals">Songs/Ghazals</option>
+</select>
+
+<select id="subSelect" style="display:none"></select>
+
+<button id="searchBtn">🔍</button>
+<input id="search" placeholder="Search">
+
+<button id="sortBtn">A→Z</button>
+<button id="addBtn">+ Add</button>
+<button id="exportBtn">Export</button>
+<input type="file" id="importFile" style="display:none">
+<button onclick="document.getElementById('importFile').click()">Import</button>
+</header>
+
+<div id="content"></div>
+
+<script>
+/* DEFAULT DATA */
+const defaultData = {
+  Kirtan: { Ram: [], Krishna:[{title:"Bhajo Radhe Govinda", lyrics:"Bhajo Radhe Govinda\nRadhe Govinda Bhajo", likes:0}], "Naam Sang":[], Durga:[], Shiva:[{title:"Shiv Shambho", lyrics:"Shiv Shambho\nShiv Shambho", likes:0}] },
+  Pooja: { Ramayan:[], "Bhagvat Katha":[], Shivratri:[], Janamashtami:[], Navaratri:[], Navmi:[],},
+  aarti: [],
+  mantras: []
+};
+
+/* LOAD SAVE */
+let data = JSON.parse(localStorage.getItem("kirtanData")) || defaultData;
+function saveData(){localStorage.setItem("kirtanData", JSON.stringify(data));}
+
+/* ELEMENTS */
+const typeSelect=document.getElementById("typeSelect");
+const subSelect=document.getElementById("subSelect");
+const content=document.getElementById("content");
+const search=document.getElementById("search");
+const sortBtn=document.getElementById("sortBtn");
+let currentType="", currentSub="", sortAZ=true;
+
+/* RENDER BOXES */
+function renderBoxes(arr){
+  content.innerHTML="";
+  let list=[...arr];
+  if(search.value) list=list.filter(x=>x.title.toLowerCase().includes(search.value.toLowerCase()));
+  list.sort((a,b)=>sortAZ ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title));
+  list.forEach((item,i)=>{
+    const box=document.createElement("div");
+    box.className="box";
+    box.innerHTML=`
+      <div class="boxTitle">${item.title}</div>
+      <div class="boxButtons">
+        <button onclick="likeItem(event,${i})">❤️ ${item.likes}</button>
+        <button onclick="editItem(event,${i})">✏️</button>
+      </div>
+    `;
+    box.onclick=()=>renderFull(item);
+    content.appendChild(box);
+  });
+}
+
+/* FULL VIEW */
+function renderFull(item){
+  content.innerHTML=`
+  <div class="fullView">
+    <button onclick="goBack()">← Back</button>
+    <button onclick="presentationMode('${item.title}','${item.lyrics}')">🎤 Presentation</button>
+    <h2>${item.title}</h2>
+    <p>${item.lyrics}</p>
+  </div>`;
+}
+
+/* PRESENTATION MODE */
+function presentationMode(title,lyrics){
+  content.innerHTML=`
+  <div class="presentation">
+    <button onclick="goBack()">← Exit</button>
+    <h2>${title}</h2>
+    <p>${lyrics}</p>
+  </div>`;
+}
+
+/* BACK */
+function goBack(){
+  let arr=getCurrentArray();
+  if(arr) renderBoxes(arr);
+}
+
+/* LIKE */
+function likeItem(e,i){
+  e.stopPropagation();
+  let arr=getCurrentArray();
+  arr[i].likes++;
+  saveData();
+  renderBoxes(arr);
+}
+
+/* EDIT */
+function editItem(e,i){
+  e.stopPropagation();
+  let arr=getCurrentArray();
+  let item=arr[i];
+  content.innerHTML=`
+  <div class="form">
+    <input id="editTitle" value="${item.title}">
+    <textarea id="editLyrics">${item.lyrics}</textarea>
+    <button onclick="saveEdit(${i})">Save</button>
+    <button onclick="goBack()">Cancel</button>
+  </div>`;
+}
+
+/* SAVE EDIT */
+function saveEdit(i){
+  let arr=getCurrentArray();
+  arr[i].title=document.getElementById("editTitle").value;
+  arr[i].lyrics=document.getElementById("editLyrics").value;
+  saveData();
+  goBack();
+}
+
+/* ADD NEW */
+document.getElementById("addBtn").onclick=()=>{
+  content.innerHTML=`
+  <div class="form">
+    <select id="addType">
+      <option value="">Type</option>
+      <option value="Kirtan">Kirtan</option>
+      <option value="Aarti">Aarti</option>
+      <option value="Mantras">Mantras</option>
+      <option value="Pooja">Pooja</option>
+    </select>
+    <select id="addSub"></select>
+    <input id="addTitle" placeholder="Title">
+    <textarea id="addLyrics" placeholder="Lyrics"></textarea>
+    <button onclick="saveAdd()">Save</button>
+    <button onclick="location.reload()">Cancel</button>
+  </div>`;
+  const type=document.getElementById("addType");
+  const sub=document.getElementById("addSub");
+  type.onchange=()=>{
+    sub.innerHTML="";
+    if(type.value==="Kirtan") Object.keys(data.Kirtan).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; sub.appendChild(o);});
+    if(type.value==="Pooja") Object.keys(data.Pooja).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; sub.appendChild(o);});
+    if(type.value==="Aarti") sub.innerHTML="<option>Songs/Ghazals</option>";
+    if(type.value==="Mantras") sub.innerHTML="<option>Songs/Ghazals</option>";
+  };
+}
+
+/* SAVE ADD */
+function saveAdd(){
+  const type=document.getElementById("addType").value;
+  const sub=document.getElementById("addSub").value;
+  const title=document.getElementById("addTitle").value;
+  const lyrics=document.getElementById("addLyrics").value;
+  const obj={title,lyrics,likes:0};
+  if(type==="Kirtan") data.Kirtan[sub].push(obj);
+  if(type==="Pooja") data.Pooja[sub].push(obj);
+  if(type==="Aarti") data.aarti.push(obj);
+  if(type==="Mantras") data.mantras.push(obj);
+  saveData();
+  location.reload();
+}
+
+/* TYPE SELECT */
+typeSelect.onchange=()=>{
+  currentType=typeSelect.value.toLowerCase();
+  if(currentType==="kirtan"){
+    subSelect.style.display="inline-block";
+    subSelect.innerHTML="";
+    Object.keys(data.Kirtan).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; subSelect.appendChild(o);});
+  }
+  else if(currentType==="pooja"){
+    subSelect.style.display="inline-block";
+    subSelect.innerHTML="";
+    Object.keys(data.Pooja).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; subSelect.appendChild(o);});
+  }
+  else{
+    subSelect.style.display="none";
+    if(currentType==="aarti") renderBoxes(data.aarti);
+    if(currentType==="mantras") renderBoxes(data.mantras);
+  }
+}
+
+/* SUB SELECT */
+subSelect.onchange=()=>{
+  currentSub=subSelect.value;
+  if(currentType==="kirtan") renderBoxes(data.Kirtan[currentSub]);
+  if(currentType==="pooja") renderBoxes(data.Pooja[currentSub]);
+}
+
+/* SEARCH BUTTON */
+document.getElementById("searchBtn").onclick=()=>{
+  search.style.display = search.style.display==="none"?"inline-block":"none";
+  if(search.style.display==="inline-block") search.focus();
+}
+search.oninput=()=>{
+  let arr=getCurrentArray();
+  if(arr) renderBoxes(arr);
+}
+
+/* SORT */
+sortBtn.onclick=()=>{
+  sortAZ=!sortAZ;
+  sortBtn.textContent=sortAZ?"A→Z":"Z→A";
+  let arr=getCurrentArray();
+  if(arr) renderBoxes(arr);
+}
+
+/* EXPORT */
+document.getElementById("exportBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="kirtan-lyrics-backup.json";
+  a.click();
+}
+
+/* IMPORT */
+document.getElementById("importFile").onchange=(e)=>{
+  const file=e.target.files[0];
+  const reader=new FileReader();
+  reader.onload=function(){
+    data=JSON.parse(reader.result);
+    saveData();
+    location.reload();
+  }
+  reader.readAsText(file);
+}
+
+/* GET CURRENT ARRAY */
+function getCurrentArray(){
+  if(currentType==="kirtan") return data.Kirtan[currentSub];
+  if(currentType==="pooja") return data.Pooja[currentSub];
+  if(currentType==="aarti") return data.aarti;
+  if(currentType==="mantras") return data.mantras;
+  return null;
+}
+</script>
+</body>
+</html>
