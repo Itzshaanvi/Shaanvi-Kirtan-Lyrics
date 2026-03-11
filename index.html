@@ -271,10 +271,60 @@ function getCurrentArray(){
   if(currentType==="songs/ghazals") return data.songs/ghazals;
   return null;
 }
+
+// ======================
+// SEARCH FUNCTIONALITY
+// ======================
+
+const searchInput = document.getElementById("searchInput");
+
+searchInput.addEventListener("input", () => {
+    const query = searchInput.value.toLowerCase().trim();
+
+    if (!query) {
+        // If search box empty, show current type/sub
+        if(currentSub) {
+            if(currentType==="kirtan") renderBoxes(data.Kirtan[currentSub]);
+            else if(currentType==="pooja") renderBoxes(data.Pooja[currentSub]);
+        } else {
+            if(currentType==="aarti") renderBoxes(data.aarti);
+            else if(currentType==="mantras") renderBoxes(data.mantras);
+        }
+        return;
+    }
+
+    // Combine all items depending on current type
+    let items = [];
+    if(currentType==="kirtan") {
+        if(currentSub) items = data.Kirtan[currentSub];
+        else Object.values(data.Kirtan).forEach(arr => items.push(...arr));
+    } else if(currentType==="pooja") {
+        if(currentSub) items = data.Pooja[currentSub];
+        else Object.values(data.Pooja).forEach(arr => items.push(...arr));
+    } else if(currentType==="aarti") {
+        items = data.aarti;
+    } else if(currentType==="mantras") {
+        items = data.mantras;
+    }
+
+    const filtered = items.filter(item =>
+        item.title.toLowerCase().includes(query) || 
+        item.lyrics.toLowerCase().includes(query)
+    );
+
+    renderBoxes(filtered);
+});
+
+// Optional: prevent Enter from submitting anything
+searchInput.addEventListener("keypress", (e) => {
+    if(e.key === "Enter") e.preventDefault();
+});
+  
 </script>
 </body>
 
 </html>
+
 
 
 
