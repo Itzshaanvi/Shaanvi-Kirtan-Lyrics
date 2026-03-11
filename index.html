@@ -176,8 +176,6 @@ document.getElementById("addBtn").onclick=()=>{
     sub.innerHTML="";
     if(type.value==="Kirtan") Object.keys(data.Kirtan).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; sub.appendChild(o);});
     if(type.value==="Pooja") Object.keys(data.Pooja).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; sub.appendChild(o);});
-    if(type.value==="Aarti") sub.innerHTML="<option>Songs/Ghazals</option>";
-    if(type.value==="Mantras") sub.innerHTML="<option>Songs/Ghazals</option>";
   };
 }
 
@@ -272,4 +270,5 @@ function getCurrentArray(){
 }
 </script>
 </body>
+
 </html>
