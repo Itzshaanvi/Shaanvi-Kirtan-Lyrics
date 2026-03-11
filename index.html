@@ -191,7 +191,7 @@ function saveAdd(){
   if(type==="Pooja") data.Pooja[sub].push(obj);
   if(type==="Aarti") data.aarti.push(obj);
   if(type==="Mantras") data.mantras.push(obj);
-    if(type==="Songs/Ghazals") data.songs/ghazals.push(obj);
+  if(type==="Songs/Ghazals") data.songs/ghazals.push(obj);
   saveData();
   location.reload();
 }
@@ -268,11 +268,13 @@ function getCurrentArray(){
   if(currentType==="pooja") return data.Pooja[currentSub];
   if(currentType==="aarti") return data.aarti;
   if(currentType==="mantras") return data.mantras;
+  if(currentType==="songs/ghazals") return data.songs/ghazals;
   return null;
 }
 </script>
 </body>
 
 </html>
+
 
 
