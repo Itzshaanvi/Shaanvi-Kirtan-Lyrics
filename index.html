@@ -163,6 +163,7 @@ document.getElementById("addBtn").onclick=()=>{
       <option value="Aarti">Aarti</option>
       <option value="Mantras">Mantras</option>
       <option value="Pooja">Pooja</option>
+      <option value="Songs/Ghazals">Songs/Ghazals</option>
     </select>
     <select id="addSub"></select>
     <input id="addTitle" placeholder="Title">
@@ -190,7 +191,7 @@ function saveAdd(){
   if(type==="Pooja") data.Pooja[sub].push(obj);
   if(type==="Aarti") data.aarti.push(obj);
   if(type==="Mantras") data.mantras.push(obj);
-    if(type==="Songs/Ghazals") data.mantras.push(obj);
+    if(type==="Songs/Ghazals") data.songs/ghazals.push(obj);
   saveData();
   location.reload();
 }
@@ -273,4 +274,5 @@ function getCurrentArray(){
 </body>
 
 </html>
+
 
