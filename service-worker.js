@@ -67,5 +67,10 @@ searchInput.addEventListener("keypress", (e) => {
     if(e.key === "Enter") e.preventDefault(); // prevents form submit
 });
 
+document.getElementById("searchIcon").addEventListener("click", ()=> 
+    document.getElementById("searchContainer").classList.toggle("active")
+)
+
+
 
 
