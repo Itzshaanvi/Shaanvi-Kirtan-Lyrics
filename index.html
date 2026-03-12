@@ -101,7 +101,7 @@ function renderBoxes(arr){
     const titleDiv=document.createElement("div");
     titleDiv.className="boxTitle";
     titleDiv.textContent=item.title;
-    titleDiv.style.textAlign="center"; // center title
+    titleDiv.style.textAlign="left"; // left title
 
     // Lyrics snippet
     const snippet=document.createElement("div");
@@ -110,7 +110,7 @@ function renderBoxes(arr){
     snippet.style.color="rgba(0,0,0,0.6)";
     snippet.style.lineHeight="1.3";
     snippet.style.fontStyle="italic";
-    snippet.style.textAlign="center"; // center snippet
+    snippet.style.textAlign="left"; // left snippet
     snippet.textContent=item.lyrics.split("\n").slice(0,2).join(" ");
 
     leftDiv.appendChild(titleDiv);
@@ -343,6 +343,7 @@ loadCloudKirtans();
 </script>
 </body>
 </html>
+
 
 
 
