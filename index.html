@@ -84,6 +84,9 @@ function renderBoxes(arr){
     const snippet=document.createElement("div");
     snippet.style.fontSize="16px";
     snippet.style.marginTop="4px";
+    snippet.style.color="rgba(0,0,0,0.6)";  // lighter text
+    snippet.style.lineHeight="1.3";
+    snippet.style.fontStyle="italic";        // optional for subtle effect
     // Show first 2 lines of lyrics
     snippet.textContent = item.lyrics.split("\n").slice(0,2).join(" ");
 
@@ -308,4 +311,5 @@ loadCloudKirtans();
 </script>
 </body>
 </html>
+
 
