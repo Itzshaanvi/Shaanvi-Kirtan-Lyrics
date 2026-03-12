@@ -1,17 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-  
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ffffff">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kirtan Lyrics</title>
-<link rel="manifest" href="manifest.json">
-
 <style>
 *{box-sizing:border-box;}
 body{margin:0;font-family:cursive;background:#f5f5f5;}
@@ -34,7 +28,6 @@ textarea{height:160px;resize:vertical;}
 
 <header>
 <h1 onclick="location.reload()">Kirtan Lyrics</h1>
-
 <select id="typeSelect">
 <option value="">Type</option>
 <option value="Kirtan">Kirtan</option>
@@ -43,12 +36,9 @@ textarea{height:160px;resize:vertical;}
 <option value="Pooja">Pooja</option>
 <option value="Songs/Ghazals">Songs/Ghazals</option>
 </select>
-
 <select id="subSelect" style="display:none"></select>
-
 <button id="searchBtn">🔍</button>
 <input id="search" placeholder="Search">
-
 <button id="sortBtn">A→Z</button>
 <button id="addBtn">+ Add</button>
 <button id="exportBtn">Export</button>
@@ -57,14 +47,15 @@ textarea{height:160px;resize:vertical;}
 </header>
 
 <div id="content"></div>
-  
+
 <script>
 /* DEFAULT DATA */
 const defaultData = {
-  Kirtan: { Ram: [], Krishna: [...], Naam:[], Durga:[], Shiva:[], Ganesh:[] },
+  Kirtan: { Ram: [], Krishna:[{title:"Bhajo Radhe Govinda", lyrics:"Bhajo Radhe Govinda\nRadhe Govinda Bhajo", likes:0}], Naam:[], Durga:[], Shiva:[{title:"Shiv Shambho", lyrics:"Shiv Shambho\nShiv Shambho", likes:0}], Ganesh:[] },
   Pooja: { Ramayan:[], "Bhagvat Katha":[], Shivratri:[], Janamashtami:[], Navaratri:[], Navmi:[] },
   aarti: [],
-  mantras: []
+  mantras: [],
+  "songs/ghazals":[]
 };
 
 /* LOAD SAVE */
@@ -85,17 +76,41 @@ function renderBoxes(arr){
   let list=[...arr];
   if(search.value) list=list.filter(x=>x.title.toLowerCase().includes(search.value.toLowerCase()));
   list.sort((a,b)=>sortAZ ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title));
-  list.forEach((item,i)=>{
+
+  list.forEach(item=>{
     const box=document.createElement("div");
     box.className="box";
-    box.innerHTML=`
-      <div class="boxTitle">${item.title}</div>
-      <div class="boxButtons">
-        <button onclick="likeItem(event,${i})">♡${item.likes}</button>
-        <button onclick="editItem(event,${i})">✎</button>
-      </div>
-    `;
+
+    const titleDiv=document.createElement("div");
+    titleDiv.className="boxTitle";
+    titleDiv.textContent=item.title;
+
+    const btnDiv=document.createElement("div");
+    btnDiv.className="boxButtons";
+
+    const likeBtn=document.createElement("button");
+    likeBtn.textContent=`♡${item.likes}`;
+    likeBtn.onclick=(e)=>{
+      e.stopPropagation();
+      item.likes++;
+      saveData();
+      renderBoxes(list);
+    };
+
+    const editBtn=document.createElement("button");
+    editBtn.textContent="✎";
+    editBtn.onclick=(e)=>{
+      e.stopPropagation();
+      editItem(item);
+    };
+
+    btnDiv.appendChild(likeBtn);
+    btnDiv.appendChild(editBtn);
+
+    box.appendChild(titleDiv);
+    box.appendChild(btnDiv);
     box.onclick=()=>renderFull(item);
+
     content.appendChild(box);
   });
 }
@@ -127,34 +142,24 @@ function goBack(){
   if(arr) renderBoxes(arr);
 }
 
-/* LIKE */
-function likeItem(e,i){
-  e.stopPropagation();
-  let arr=getCurrentArray();
-  arr[i].likes++;
-  saveData();
-  renderBoxes(arr);
-}
-
 /* EDIT */
-function editItem(e,i){
-  e.stopPropagation();
-  let arr=getCurrentArray();
-  let item=arr[i];
+function editItem(item){
   content.innerHTML=`
-  <div class="form">
-    <input id="editTitle" value="${item.title}">
-    <textarea id="editLyrics">${item.lyrics}</textarea>
-    <button onclick="saveEdit(${i})">Save</button>
-    <button onclick="goBack()">Cancel</button>
-  </div>`;
+    <div class="form">
+      <input id="editTitle" value="${item.title}">
+      <textarea id="editLyrics">${item.lyrics}</textarea>
+      <button onclick="saveEdit('${item.title}')">Save</button>
+      <button onclick="goBack()">Cancel</button>
+    </div>`;
+  window._editItem=item;
 }
 
 /* SAVE EDIT */
-function saveEdit(i){
+function saveEdit(title){
   let arr=getCurrentArray();
-  arr[i].title=document.getElementById("editTitle").value;
-  arr[i].lyrics=document.getElementById("editLyrics").value;
+  const item=arr.find(x=>x.title===title) || window._editItem;
+  item.title=document.getElementById("editTitle").value;
+  item.lyrics=document.getElementById("editLyrics").value;
   saveData();
   goBack();
 }
@@ -162,28 +167,28 @@ function saveEdit(i){
 /* ADD NEW */
 document.getElementById("addBtn").onclick=()=>{
   content.innerHTML=`
-  <div class="form">
-    <select id="addType">
-      <option value="">Type</option>
-      <option value="Kirtan">Kirtan</option>
-      <option value="Aarti">Aarti</option>
-      <option value="Mantras">Mantras</option>
-      <option value="Pooja">Pooja</option>
-      <option value="Songs/Ghazals">Songs/Ghazals</option>
-    </select>
-    <select id="addSub"></select>
-    <input id="addTitle" placeholder="Title">
-    <textarea id="addLyrics" placeholder="Lyrics"></textarea>
-    <button onclick="saveAdd()">Save</button>
-    <button onclick="location.reload()">Cancel</button>
-  </div>`;
+    <div class="form">
+      <select id="addType">
+        <option value="">Type</option>
+        <option value="Kirtan">Kirtan</option>
+        <option value="Aarti">Aarti</option>
+        <option value="Mantras">Mantras</option>
+        <option value="Pooja">Pooja</option>
+        <option value="Songs/Ghazals">Songs/Ghazals</option>
+      </select>
+      <select id="addSub"></select>
+      <input id="addTitle" placeholder="Title">
+      <textarea id="addLyrics" placeholder="Lyrics"></textarea>
+      <button onclick="saveAdd()">Save</button>
+      <button onclick="location.reload()">Cancel</button>
+    </div>`;
+
   const type=document.getElementById("addType");
   const sub=document.getElementById("addSub");
   type.onchange=()=>{
     sub.innerHTML="";
-    if(type.value==="Kirtan") Object.keys(data.Kirtan).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; sub.appendChild(o);});
-    if(type.value==="Pooja") Object.keys(data.Pooja).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; sub.appendChild(o);});
-    if(type==="Songs/Ghazals") data["songs/ghazals"].push(obj);
+    if(type.value==="Kirtan") Object.keys(data.Kirtan).forEach(d=>{let o=document.createElement("option"); o.value=d;o.textContent=d;sub.appendChild(o);});
+    if(type.value==="Pooja") Object.keys(data.Pooja).forEach(d=>{let o=document.createElement("option"); o.value=d;o.textContent=d;sub.appendChild(o);});
   };
 }
 
@@ -193,19 +198,14 @@ function saveAdd(){
   const sub=document.getElementById("addSub").value;
   const title=document.getElementById("addTitle").value;
   const lyrics=document.getElementById("addLyrics").value;
-  const obj={
-  title,
-  lyrics,
-  likes:0,
-  type:type,
-  sub:sub
-};
-  
+  const obj={title,lyrics,likes:0,type,sub};
+
   if(type==="Kirtan") data.Kirtan[sub].push(obj);
-  if(type==="Pooja") data.Pooja[sub].push(obj);
-  if(type==="Aarti") data.aarti.push(obj);
-  if(type==="Mantras") data.mantras.push(obj);
-  if(type==="Songs/Ghazals") data["songs/ghazals"].push(obj);
+  else if(type==="Pooja") data.Pooja[sub].push(obj);
+  else if(type==="Aarti") data.aarti.push(obj);
+  else if(type==="Mantras") data.mantras.push(obj);
+  else if(type==="Songs/Ghazals") data["songs/ghazals"].push(obj);
+
   saveData();
   saveKirtanToCloud(obj);
   location.reload();
@@ -217,12 +217,12 @@ typeSelect.onchange=()=>{
   if(currentType==="kirtan"){
     subSelect.style.display="inline-block";
     subSelect.innerHTML="";
-    Object.keys(data.Kirtan).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; subSelect.appendChild(o);});
+    Object.keys(data.Kirtan).forEach(d=>{let o=document.createElement("option"); o.value=d;o.textContent=d;subSelect.appendChild(o);});
   }
   else if(currentType==="pooja"){
     subSelect.style.display="inline-block";
     subSelect.innerHTML="";
-    Object.keys(data.Pooja).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; subSelect.appendChild(o);});
+    Object.keys(data.Pooja).forEach(d=>{let o=document.createElement("option"); o.value=d;o.textContent=d;subSelect.appendChild(o);});
   }
   else{
     subSelect.style.display="none";
@@ -238,7 +238,7 @@ subSelect.onchange=()=>{
   if(currentType==="pooja") renderBoxes(data.Pooja[currentSub]);
 }
 
-/* SEARCH BUTTON */
+/* SEARCH */
 document.getElementById("searchBtn").onclick=()=>{
   search.style.display = search.style.display==="none"?"inline-block":"none";
   if(search.style.display==="inline-block") search.focus();
@@ -287,75 +287,14 @@ function getCurrentArray(){
   return null;
 }
 
-// ======================
-// SEARCH FUNCTIONALITY
-// ======================
-
-const searchInput = document.getElementById("search");
-
-searchInput.addEventListener("input", () => {
-    const query = searchInput.value.toLowerCase().trim();
-
-    if (!query) {
-        // If search box empty, show current type/sub
-        if(currentSub) {
-            if(currentType==="kirtan") renderBoxes(data.Kirtan[currentSub]);
-            else if(currentType==="pooja") renderBoxes(data.Pooja[currentSub]);
-        } else {
-            if(currentType==="aarti") renderBoxes(data.aarti);
-            else if(currentType==="mantras") renderBoxes(data.mantras);
-        }
-        return;
-    }
-
-    // Combine all items depending on current type
-    let items = [];
-    if(currentType==="kirtan") {
-        if(currentSub) items = data.Kirtan[currentSub];
-        else Object.values(data.Kirtan).forEach(arr => items.push(...arr));
-    } else if(currentType==="pooja") {
-        if(currentSub) items = data.Pooja[currentSub];
-        else Object.values(data.Pooja).forEach(arr => items.push(...arr));
-    } else if(currentType==="aarti") {
-        items = data.aarti;
-    } else if(currentType==="mantras") {
-        items = data.mantras;
-    }
-
-    const filtered = items.filter(item =>
-        item.title.toLowerCase().includes(query) || 
-        item.lyrics.toLowerCase().includes(query)
-    );
-
-    renderBoxes(filtered);
-});
-
-// Optional: prevent Enter from submitting anything
-searchInput.addEventListener("keypress", (e) => {
-    if(e.key === "Enter") e.preventDefault();
-});
-const firebaseConfig = {
-  apiKey: "AIza…",
-  authDomain: "kirtan-lyrics-57c73.firebaseapp.com",
-  projectId: "kirtan-lyrics-57c73",
-  storageBucket: "kirtan-lyrics-57c73.appspot.com",
-  messagingSenderId: "…",
-  appId: "…"
-};
-
+/* FIREBASE */
+const firebaseConfig = { /* your config */ };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
-/* SAVE TO FIREBASE */
 async function saveKirtanToCloud(item){
-  try{
-    await addDoc(collection(db,"kirtans"), item);
-  }catch(err){
-    console.error("Cloud save failed",err);
-  }
+  try{ await addDoc(collection(db,"kirtans"), item); }
+  catch(err){ console.error("Cloud save failed",err); }
 }
-
-/* LOAD FROM FIREBASE */
 async function loadCloudKirtans(){
   try{
     const querySnapshot = await getDocs(collection(db,"kirtans"));
@@ -367,24 +306,10 @@ async function loadCloudKirtans(){
       if(item.type==="Mantras") data.mantras.push(item);
     });
     saveData();
-  }catch(err){
-    console.error("Cloud load failed",err);
-  }
+  }catch(err){ console.error("Cloud load failed",err);}
 }
-
 loadCloudKirtans();
-  
+
 </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
