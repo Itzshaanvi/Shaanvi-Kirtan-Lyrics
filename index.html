@@ -81,6 +81,12 @@ function renderBoxes(arr){
     titleDiv.className="boxTitle";
     titleDiv.textContent=item.title;
 
+    const snippet=document.createElement("div");
+    snippet.style.fontSize="16px";
+    snippet.style.marginTop="4px";
+    // Show first 2 lines of lyrics
+    snippet.textContent = item.lyrics.split("\n").slice(0,2).join(" ");
+
     const btnDiv=document.createElement("div");
     btnDiv.className="boxButtons";
 
@@ -102,9 +108,13 @@ function renderBoxes(arr){
 
     btnDiv.appendChild(likeBtn);
     btnDiv.appendChild(editBtn);
+
     box.appendChild(titleDiv);
+    box.appendChild(snippet);
     box.appendChild(btnDiv);
+
     box.onclick=()=>renderFull(item);
+
     content.appendChild(box);
   });
 }
@@ -298,3 +308,4 @@ loadCloudKirtans();
 </script>
 </body>
 </html>
+
