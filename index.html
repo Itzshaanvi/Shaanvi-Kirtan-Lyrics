@@ -61,7 +61,7 @@ textarea{height:160px;resize:vertical;}
 <script>
 /* DEFAULT DATA */
 const defaultData = {
-  Kirtan: { Ram: [], Krishna:[{title:"Bhajo Radhe Govinda", lyrics:"Bhajo Radhe Govinda\nRadhe Govinda Bhajo", likes:0}], "Naam Sang":[], Durga:[], Shiva:[{title:"Shiv Shambho", lyrics:"Shiv Shambho\nShiv Shambho", likes:0}] },
+  Kirtan: { Ram: [], Krishna: [...], Naam:[], Durga:[], Shiva:[], Ganesh:[] },
   Pooja: { Ramayan:[], "Bhagvat Katha":[], Shivratri:[], Janamashtami:[], Navaratri:[], Navmi:[] },
   aarti: [],
   mantras: []
@@ -183,6 +183,7 @@ document.getElementById("addBtn").onclick=()=>{
     sub.innerHTML="";
     if(type.value==="Kirtan") Object.keys(data.Kirtan).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; sub.appendChild(o);});
     if(type.value==="Pooja") Object.keys(data.Pooja).forEach(d=>{let o=document.createElement("option"); o.value=d; o.textContent=d; sub.appendChild(o);});
+    if(type==="Songs/Ghazals") data["songs/ghazals"].push(obj);
   };
 }
 
@@ -377,6 +378,7 @@ loadCloudKirtans();
 </body>
 
 </html>
+
 
 
 
