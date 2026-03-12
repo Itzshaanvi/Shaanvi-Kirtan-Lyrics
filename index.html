@@ -204,7 +204,7 @@ function saveAdd(){
   if(type==="Pooja") data.Pooja[sub].push(obj);
   if(type==="Aarti") data.aarti.push(obj);
   if(type==="Mantras") data.mantras.push(obj);
-    data["songs/ghazals"].push(obj);
+  if(type==="Songs/Ghazals") data["songs/ghazals"].push(obj);
   saveData();
   saveKirtanToCloud(obj);
   location.reload();
@@ -282,7 +282,7 @@ function getCurrentArray(){
   if(currentType==="pooja") return data.Pooja[currentSub];
   if(currentType==="aarti") return data.aarti;
   if(currentType==="mantras") return data.mantras;
-  if(currentType==="songs/ghazals") return data.songs/ghazals;
+  if(currentType==="songs/ghazals") return data["songs/ghazals"];
   return null;
 }
 
@@ -333,9 +333,6 @@ searchInput.addEventListener("input", () => {
 searchInput.addEventListener("keypress", (e) => {
     if(e.key === "Enter") e.preventDefault();
 });
-  
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
@@ -381,6 +378,7 @@ loadCloudKirtans();
 </body>
 
 </html>
+
 
 
 
