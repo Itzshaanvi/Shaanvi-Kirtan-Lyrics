@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  
   <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ffffff">
 <meta charset="UTF-8">
@@ -53,7 +57,7 @@ textarea{height:160px;resize:vertical;}
 </header>
 
 <div id="content"></div>
-
+  
 <script>
 /* DEFAULT DATA */
 const defaultData = {
@@ -87,8 +91,8 @@ function renderBoxes(arr){
     box.innerHTML=`
       <div class="boxTitle">${item.title}</div>
       <div class="boxButtons">
-        <button onclick="likeItem(event,${i})">❤️ ${item.likes}</button>
-        <button onclick="editItem(event,${i})">✏️</button>
+        <button onclick="likeItem(event,${i})">♡${item.likes}</button>
+        <button onclick="editItem(event,${i})">✎</button>
       </div>
     `;
     box.onclick=()=>renderFull(item);
@@ -188,13 +192,21 @@ function saveAdd(){
   const sub=document.getElementById("addSub").value;
   const title=document.getElementById("addTitle").value;
   const lyrics=document.getElementById("addLyrics").value;
-  const obj={title,lyrics,likes:0};
+  const obj={
+  title,
+  lyrics,
+  likes:0,
+  type:type,
+  sub:sub
+};
+  
   if(type==="Kirtan") data.Kirtan[sub].push(obj);
   if(type==="Pooja") data.Pooja[sub].push(obj);
   if(type==="Aarti") data.aarti.push(obj);
   if(type==="Mantras") data.mantras.push(obj);
-  if(type==="Songs/Ghazals") data.songs/ghazals.push(obj);
+    data["songs/ghazals"].push(obj);
   saveData();
+  saveKirtanToCloud(obj);
   location.reload();
 }
 
@@ -278,7 +290,7 @@ function getCurrentArray(){
 // SEARCH FUNCTIONALITY
 // ======================
 
-const searchInput = document.getElementById("searchInput");
+const searchInput = document.getElementById("search");
 
 searchInput.addEventListener("input", () => {
     const query = searchInput.value.toLowerCase().trim();
@@ -322,10 +334,54 @@ searchInput.addEventListener("keypress", (e) => {
     if(e.key === "Enter") e.preventDefault();
 });
   
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "XXXX",
+  appId: "XXXX"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* SAVE TO FIREBASE */
+async function saveKirtanToCloud(item){
+  try{
+    await addDoc(collection(db,"kirtans"), item);
+  }catch(err){
+    console.error("Cloud save failed",err);
+  }
+}
+
+/* LOAD FROM FIREBASE */
+async function loadCloudKirtans(){
+  try{
+    const querySnapshot = await getDocs(collection(db,"kirtans"));
+    querySnapshot.forEach((doc)=>{
+      const item = doc.data();
+      if(item.type==="Kirtan") data.Kirtan[item.sub].push(item);
+      if(item.type==="Pooja") data.Pooja[item.sub].push(item);
+      if(item.type==="Aarti") data.aarti.push(item);
+      if(item.type==="Mantras") data.mantras.push(item);
+    });
+    saveData();
+  }catch(err){
+    console.error("Cloud load failed",err);
+  }
+}
+
+loadCloudKirtans();
+  
 </script>
 </body>
 
 </html>
+
 
 
 
