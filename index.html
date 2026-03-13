@@ -4,149 +4,332 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Kirtan Lyrics</title>
+
 <style>
-body { font-family: cursive; background-color:#fff; color:#000; margin:0; padding:0; }
-header{ display:flex; justify-content:space-between; align-items:center; padding:20px; flex-wrap:wrap; }
-header h1{ margin:0; font-size:36px; cursor:pointer; }
-nav select, #addLyricsBtn, #filterBtn, #increaseFont, #decreaseFont{ 
-  padding:8px 15px; border-radius:12px; border:1px solid rgba(0,0,0,0.2); background-color: rgba(255,255,255,0.1); backdrop-filter:blur(8px); cursor:pointer; transition: all 0.2s; font-weight:bold;
+
+body{
+font-family:cursive;
+background:#ffffff;
+color:#000;
+margin:0;
+padding:0;
 }
-nav select:hover, #addLyricsBtn:hover, #filterBtn:hover, #increaseFont:hover, #decreaseFont:hover{ background-color: rgba(255,255,255,0.2); transform:scale(1.05);}
-#content{max-width:900px;margin:0 auto;padding:20px;}
-.box{background-color: rgba(255,255,255,0.1); backdrop-filter:blur(10px); border-radius:15px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; cursor:pointer;}
-.boxTitle{font-weight:bold; font-size:20px;}
-.boxSnippet{color:gray; margin-top:5px;}
-.likeBtn, .editBtn{padding:5px 8px; margin-left:5px; border-radius:8px; border:1px solid rgba(0,0,0,0.2); background-color:rgba(255,255,255,0.1); cursor:pointer;}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px;
+flex-wrap:wrap;
+}
+
+header h1{
+margin:0;
+font-size:36px;
+cursor:pointer;
+}
+
+nav{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+/* GLASS STYLE */
+button, select, input, textarea{
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(10px);
+border:1px solid rgba(0,0,0,0.2);
+border-radius:12px;
+padding:10px 14px;
+font-family:cursive;
+font-size:16px;
+transition:0.2s;
+}
+
+button{
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+transform:scale(1.05);
+background:rgba(255,255,255,0.25);
+}
+
+input, textarea{
+width:100%;
+margin-top:10px;
+}
+
+textarea{
+height:200px;
+resize:vertical;
+}
+
+#content{
+max-width:900px;
+margin:auto;
+padding:20px;
+}
+
+/* LYRICS CARD */
+.box{
+background:rgba(255,255,255,0.12);
+backdrop-filter:blur(12px);
+border-radius:15px;
+padding:15px;
+margin-bottom:12px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.boxLeft{
+display:flex;
+flex-direction:column;
+}
+
+.boxTitle{
+font-weight:bold;
+font-size:20px;
+}
+
+.boxSnippet{
+color:gray;
+margin-top:5px;
+}
+
+.boxButtons{
+display:flex;
+gap:6px;
+}
+
+.likeBtn,.editBtn{
+padding:6px 10px;
+font-size:14px;
+}
+
+.editForm{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.dropdownRow{
+display:flex;
+gap:10px;
+}
+
 </style>
 </head>
+
 <body>
 
 <header>
 <h1>Kirtan Lyrics</h1>
+
 <nav>
-  <select id="typeSelect">
-    <option value="">Select Type</option>
-    <option value="aarti">Aarti</option>
-    <option value="kirtan">Kirtan</option>
-    <option value="mantras">Mantras</option>
-    <option value="pooja">Pooja</option>
-  </select>
-  <select id="subSelect" style="display:none;"></select>
-  <button id="addLyricsBtn">+ Add Lyrics</button>
+<select id="typeSelect">
+<option value="">Select Type</option>
+<option value="aarti">Aarti</option>
+<option value="kirtan">Kirtan</option>
+<option value="mantras">Mantras</option>
+<option value="pooja">Pooja</option>
+</select>
+
+<select id="subSelect" style="display:none;"></select>
+
+<button id="addLyricsBtn">+ Add Lyrics</button>
 </nav>
 </header>
-
-<div id="filterContainer">
-  <button id="filterBtn">Sort A → Z</button>
-  <button id="increaseFont">A+</button>
-  <button id="decreaseFont">A-</button>
-</div>
 
 <div id="content"></div>
 
 <script>
-// --- DATA ---
-const data = {
-  aarti: [],
-  mantras: [],
-  kirtan: { Ram:[], Krishna:[], Durga:[], Shiva:[], Ganesh:[], Hanuman:[], Naam:[] },
-  pooja: { Ramayan:[], "Bhagvat Katha":[], Navratri:[], Navmi:[], Shivratri:[], Janamashtami:[], "Ganesh Chathurthi":[] }
-};
 
-  function searchLyrics() {
-  const query = document.getElementById("searchInput").value.toLowerCase();
-  if (!currentType) return;
+/* DATA */
 
-  let items = [];
-  if (currentType === "aarti") items = data.aarti;
-  else if (currentType === "mantras") items = data.mantras;
-  else if (currentType === "kirtan" && currentSub) items = data.kirtan[currentSub] || [];
-  else if (currentType === "pooja" && currentSub) items = data.pooja[currentSub] || [];
-
-  const filtered = items.filter(item => item.title.toLowerCase().includes(query) || item.lyrics.toLowerCase().includes(query));
-  renderBoxes(filtered);
+const data={
+aarti:[],
+mantras:[],
+kirtan:{Ram:[],Krishna:[],Durga:[],Shiva:[],Ganesh:[],Hanuman:[],Naam:[]},
+pooja:{Ramayan:[],"Bhagvat Katha":[],Navratri:[],Navmi:[],Shivratri:[],Janamashtami:[],"Ganesh Chathurthi":[]}
 }
-  
-// --- STATE ---
-let currentType="", currentSub="", isAZ=true, lyricFontSize=20;
 
-// --- ELEMENTS ---
-const typeSelect=document.getElementById("typeSelect");
-const subSelect=document.getElementById("subSelect");
-const contentDiv=document.getElementById("content");
-const addBtn=document.getElementById("addLyricsBtn");
-const filterBtn=document.getElementById("filterBtn");
-const increaseFont=document.getElementById("increaseFont");
-const decreaseFont=document.getElementById("decreaseFont");
+/* STATE */
 
-// --- FUNCTIONS ---
-function renderSubSelect(type, selectElement){
-  selectElement.innerHTML="";
-  if(type==="kirtan") ["Ram","Krishna","Durga","Shiva","Ganesh","Hanuman","Naam"].forEach(d=>{ const o=document.createElement("option"); o.value=d; o.textContent=d; selectElement.appendChild(o); });
-  else if(type==="pooja") ["Ramayan","Bhagvat Katha","Navratri","Navmi","Shivratri","Janamashtami","Ganesh Chathurthi"].forEach(p=>{ const o=document.createElement("option"); o.value=p; o.textContent=p; selectElement.appendChild(o); });
+let currentType=""
+let currentSub=""
+let isAZ=true
+
+/* ELEMENTS */
+
+const typeSelect=document.getElementById("typeSelect")
+const subSelect=document.getElementById("subSelect")
+const contentDiv=document.getElementById("content")
+const addBtn=document.getElementById("addLyricsBtn")
+
+/* SUBSELECT */
+
+function renderSubSelect(type,selectElement){
+
+selectElement.innerHTML=""
+
+if(type==="kirtan"){
+["Ram","Krishna","Durga","Shiva","Ganesh","Hanuman","Naam"].forEach(d=>{
+const o=document.createElement("option")
+o.value=d
+o.textContent=d
+selectElement.appendChild(o)
+})
 }
+
+if(type==="pooja"){
+["Ramayan","Bhagvat Katha","Navratri","Navmi","Shivratri","Janamashtami","Ganesh Chathurthi"].forEach(p=>{
+const o=document.createElement("option")
+o.value=p
+o.textContent=p
+selectElement.appendChild(o)
+})
+}
+
+}
+
+/* RENDER LYRICS */
 
 function renderBoxes(items){
-  contentDiv.innerHTML="";
-  items.sort((a,b)=>isAZ?a.title.localeCompare(b.title):b.title.localeCompare(a.title)).forEach(item=>{
-    const box=document.createElement("div"); box.className="box";
-    const title=document.createElement("div"); title.className="boxTitle"; title.textContent=item.title;
-    const snippet=document.createElement("div"); snippet.className="boxSnippet"; snippet.textContent=item.lyrics.split("\n")[0]+"...";
-    box.appendChild(title); box.appendChild(snippet);
-    contentDiv.appendChild(box);
-  });
+
+contentDiv.innerHTML=""
+
+items.forEach((item,index)=>{
+
+const box=document.createElement("div")
+box.className="box"
+
+const left=document.createElement("div")
+left.className="boxLeft"
+
+const title=document.createElement("div")
+title.className="boxTitle"
+title.textContent=item.title
+
+const snippet=document.createElement("div")
+snippet.className="boxSnippet"
+snippet.textContent=item.lyrics.split("\n")[0]+"..."
+
+left.appendChild(title)
+left.appendChild(snippet)
+
+const buttons=document.createElement("div")
+buttons.className="boxButtons"
+
+const like=document.createElement("button")
+like.className="likeBtn"
+like.textContent="♡"
+
+const edit=document.createElement("button")
+edit.className="editBtn"
+edit.textContent="Edit"
+
+buttons.appendChild(like)
+buttons.appendChild(edit)
+
+box.appendChild(left)
+box.appendChild(buttons)
+
+contentDiv.appendChild(box)
+
+})
+
 }
+
+/* ADD FORM */
 
 function openAddForm(){
-  contentDiv.innerHTML=`
-  <div class="editForm">
-    <h2>Add New Lyrics</h2>
-    <input type="text" id="editTitle" placeholder="Title">
-    <select id="editType">
-      <option value="aarti">Aarti</option>
-      <option value="kirtan">Kirtan</option>
-      <option value="mantras">Mantras</option>
-      <option value="pooja">Pooja</option>
-    </select>
-    <select id="editSub"></select>
-    <textarea id="editLyrics" placeholder="Lyrics"></textarea>
-    <button id="saveAddBtn">Save</button>
-  </div>
-  `;
-  const editType=document.getElementById("editType");
-  const editSub=document.getElementById("editSub");
-  renderSubSelect(editType.value, editSub);
-  editType.addEventListener("change", ()=>renderSubSelect(editType.value, editSub));
-  document.getElementById("searchInput").addEventListener("input", searchLyrics);
-  document.getElementById("saveAddBtn").addEventListener("click", ()=>{
-    const t=document.getElementById("editTitle").value;
-    const l=document.getElementById("editLyrics").value;
-    const type=editType.value.toLowerCase();
-    const sub=editSub.value;
-    if(type==="kirtan") data.kirtan[sub].push({title:t, lyrics:l});
-    else if(type==="pooja") data.pooja[sub].push({title:t, lyrics:l});
-    else data[type].push({title:t, lyrics:l});
-    cancelForm();
-  });
+
+contentDiv.innerHTML=`
+
+<div class="editForm">
+
+<h2>Add Lyrics</h2>
+
+<div class="dropdownRow">
+<select id="editType">
+<option value="aarti">Aarti</option>
+<option value="kirtan">Kirtan</option>
+<option value="mantras">Mantras</option>
+<option value="pooja">Pooja</option>
+</select>
+
+<select id="editSub"></select>
+</div>
+
+<input type="text" id="editTitle" placeholder="Title">
+
+<textarea id="editLyrics" placeholder="Lyrics"></textarea>
+
+<button id="saveAddBtn">Save</button>
+
+</div>
+
+`
+
+const editType=document.getElementById("editType")
+const editSub=document.getElementById("editSub")
+
+renderSubSelect(editType.value,editSub)
+
+editType.addEventListener("change",()=>{
+renderSubSelect(editType.value,editSub)
+})
+
+document.getElementById("saveAddBtn").addEventListener("click",()=>{
+
+const t=document.getElementById("editTitle").value
+const l=document.getElementById("editLyrics").value
+const type=editType.value
+const sub=editSub.value
+
+if(type==="kirtan"){
+data.kirtan[sub].push({title:t,lyrics:l})
+renderBoxes(data.kirtan[sub])
 }
 
-function cancelForm(){
-  contentDiv.innerHTML="";
-  typeSelect.value="";
-  subSelect.style.display="none";
+else if(type==="pooja"){
+data.pooja[sub].push({title:t,lyrics:l})
+renderBoxes(data.pooja[sub])
 }
 
-// --- EVENTS ---
-addBtn.addEventListener("click", openAddForm);
+else{
+data[type].push({title:t,lyrics:l})
+renderBoxes(data[type])
+}
 
-typeSelect.addEventListener("change", ()=>{
-  currentType=typeSelect.value;
-  if(currentType==="kirtan" || currentType==="pooja"){
-    subSelect.style.display="inline-block";
-    renderSubSelect(currentType, subSelect);
-  } else subSelect.style.display="none";
-});
+})
+
+}
+
+/* EVENTS */
+
+addBtn.addEventListener("click",openAddForm)
+
+typeSelect.addEventListener("change",()=>{
+
+currentType=typeSelect.value
+
+if(currentType==="kirtan"||currentType==="pooja"){
+subSelect.style.display="inline-block"
+renderSubSelect(currentType,subSelect)
+}
+
+else{
+subSelect.style.display="none"
+}
+
+})
+
 </script>
+
 </body>
 </html>
-
