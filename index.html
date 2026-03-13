@@ -182,8 +182,8 @@ const content=document.getElementById("content");
 const search=document.getElementById("search");
 const sortBtn=document.getElementById("sortBtn");
 
-let currentType="Kirtan";
-let currentSub="Krishna";
+currentType = "Kirtan";
+currentSub = "Krishna";
 let sortAZ=true;
 
 
@@ -191,28 +191,27 @@ let sortAZ=true;
 
 function getCurrentArray(){
 
-if(currentType==="Kirtan"){
-return data.Kirtan[currentSub]||[];
-}
+  if(currentType === "Kirtan") {
+    return data.Kirtan[currentSub] || [];
+  }
 
-if(currentType==="Pooja"){
-return data.Pooja[currentSub]||[];
-}
+  if(currentType === "Pooja") {
+    return data.Pooja[currentSub] || [];
+  }
 
-if(currentType==="Aarti"){
-return data.Aarti;
-}
+  if(currentType === "Aarti") {
+    return data.Aarti;
+  }
 
-if(currentType==="Mantras"){
-return data.Mantras;
-}
+  if(currentType === "Mantras") {
+    return data.Mantras;
+  }
 
-if(currentType==="Songs/Ghazals"){
-return data["Songs/Ghazals"];
-}
+  if(currentType === "Songs/Ghazals") {
+    return data["Songs/Ghazals"];
+  }
 
-return[];
-
+  return [];
 }
 
 
@@ -388,3 +387,4 @@ renderBoxes(getCurrentArray());
 
 </body>
 </html>
+
