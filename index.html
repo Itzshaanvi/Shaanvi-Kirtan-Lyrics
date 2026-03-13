@@ -181,6 +181,50 @@ localStorage.setItem("kirtanData",JSON.stringify(data));
 const content=document.getElementById("content");
 const search=document.getElementById("search");
 const sortBtn=document.getElementById("sortBtn");
+const content=document.getElementById("content");
+const search=document.getElementById("search");
+const sortBtn=document.getElementById("sortBtn");
+
+/* ADD THIS PART */
+const typeSelect = document.getElementById("typeSelect");
+const subSelect = document.getElementById("subSelect");
+
+
+/* TYPE CHANGE */
+typeSelect.onchange = function(){
+
+currentType = this.value;
+currentSub = "";
+
+subSelect.innerHTML = "";
+subSelect.style.display = "none";
+
+/* If Kirtan show subs */
+if(currentType === "Kirtan"){
+
+subSelect.style.display = "inline";
+
+Object.keys(data.Kirtan).forEach(sub=>{
+const option = document.createElement("option");
+option.value = sub;
+option.textContent = sub;
+subSelect.appendChild(option);
+});
+
+currentSub = subSelect.value;
+}
+
+renderBoxes(getCurrentArray());
+};
+
+
+/* SUB CHANGE */
+subSelect.onchange = function(){
+
+currentSub = this.value;
+renderBoxes(getCurrentArray());
+
+};
 
 currentType = "Kirtan";
 currentSub = "Krishna";
@@ -264,7 +308,19 @@ likeBtn.onclick=(e)=>{
 e.stopPropagation();
 item.likes++;
 saveData();
-renderBoxes(getCurrentArray());
+typeSelect.value = "Kirtan";
+subSelect.style.display = "inline";
+
+Object.keys(data.Kirtan).forEach(sub=>{
+const option=document.createElement("option");
+option.value=sub;
+option.textContent=sub;
+subSelect.appendChild(option);
+});
+
+subSelect.value="Krishna";
+
+renderBoxes(data.Kirtan["Krishna"]);
 };
 
 const editBtn=document.createElement("button");
@@ -387,4 +443,5 @@ renderBoxes(getCurrentArray());
 
 </body>
 </html>
+
 
