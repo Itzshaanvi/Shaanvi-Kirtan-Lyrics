@@ -90,12 +90,29 @@ const db=firebase.firestore();
 
 /* DATA */
 
-let data={
-Kirtan:{Krishna:[],Ram:[],Shiva:[]},
+const defaultData={
+Kirtan:{
+Ram:[],
+Krishna:[],
+Durga:[],
+Shiva:[],
+Ganesh:[],
+Hanuman:[],
+Marni:[]
+},
+
+Pooja:{
+Ramayan:[],
+BhagvatKatha:[],
+Navratri:[],
+Navmi:[],
+Shivratri:[]
+},
+
 Aarti:[],
 Mantras:[],
-Pooja:{},
 "Songs/Ghazals":[]
+};
 };
 
 /* UI */
@@ -370,3 +387,4 @@ render();
 
 </body>
 </html>
+
