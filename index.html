@@ -5,23 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kirtan Lyrics</title>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+
 <style>
-*{box-sizing:border-box;}
-
-body{
-margin:0;
-font-family:cursive;
-background:#f5f5f5;
-}
-
-header{
-display:flex;
-flex-wrap:wrap;
-gap:10px;
-justify-content:space-between;
-align-items:center;
-padding:20px;
-}
+*{box-sizing:border-box}
+body{margin:0;font-family:cursive;background:#f5f5f5}
+header{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;padding:20px}
 
 button,select,input{
 border-radius:12px;
@@ -31,92 +21,27 @@ backdrop-filter:blur(10px);
 padding:8px 12px;
 font-family:cursive;
 cursor:pointer;
-transition:.3s;
 }
 
-button:hover,select:hover,input:hover{
-background:rgba(255,255,255,0.4);
-}
-
-#content{
-max-width:900px;
-margin:auto;
-padding:20px;
-display:flex;
-flex-direction:column;
-gap:12px;
-}
+#content{max-width:900px;margin:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
 
 .box{
 display:flex;
 justify-content:space-between;
-align-items:flex-start;
 padding:16px;
 border-radius:16px;
 background:rgba(255,255,255,0.35);
-backdrop-filter:blur(12px);
-cursor:pointer;
+cursor:pointer
 }
 
-.boxLeft{
-display:flex;
-flex-direction:column;
-flex:1;
-}
+.boxLeft{display:flex;flex-direction:column}
+.boxTitle{font-size:20px;font-weight:bold}
+.boxSnippet{font-size:16px;color:rgba(0,0,0,0.6)}
 
-.boxTitle{
-font-size:20px;
-font-weight:bold;
-text-align:left;
-}
+textarea{height:150px}
+.form{background:white;padding:20px;border-radius:16px;display:flex;flex-direction:column;gap:10px}
 
-.boxSnippet{
-font-size:16px;
-color:rgba(0,0,0,0.6);
-font-style:italic;
-line-height:1.3;
-margin-top:4px;
-text-align:left;
-}
-
-.boxButtons{
-display:flex;
-gap:6px;
-}
-
-.fullView h2{
-font-size:28px;
-}
-
-.fullView p{
-white-space:pre-line;
-font-size:20px;
-line-height:1.7;
-}
-
-.presentation p{
-font-size:42px;
-text-align:center;
-line-height:1.8;
-}
-
-.form{
-background:white;
-padding:20px;
-border-radius:16px;
-display:flex;
-flex-direction:column;
-gap:10px;
-}
-
-textarea{
-height:160px;
-resize:vertical;
-}
-
-#search{
-display:none;
-}
+.presentation p{font-size:42px;text-align:center}
 </style>
 </head>
 
@@ -127,7 +52,6 @@ display:none;
 <h1 onclick="location.reload()">Kirtan Lyrics</h1>
 
 <select id="typeSelect">
-<option value="">Type</option>
 <option value="Kirtan">Kirtan</option>
 <option value="Aarti">Aarti</option>
 <option value="Mantras">Mantras</option>
@@ -135,14 +59,13 @@ display:none;
 <option value="Songs/Ghazals">Songs/Ghazals</option>
 </select>
 
-<select id="subSelect" style="display:none"></select>
+<select id="subSelect"></select>
 
 <button id="searchBtn">🔍</button>
-<input id="search" placeholder="Search">
+<input id="search" placeholder="Search" style="display:none">
 
 <button id="sortBtn">A→Z</button>
 <button id="addBtn">+ Add</button>
-
 <button id="exportBtn">Export</button>
 
 <input type="file" id="importFile" style="display:none">
@@ -154,190 +77,108 @@ display:none;
 
 <script>
 
+/* FIREBASE CONFIG */
+
+const firebaseConfig={
+apiKey:"YOUR_API_KEY",
+authDomain:"YOUR_DOMAIN",
+projectId:"YOUR_PROJECT_ID"
+};
+
+const app=firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+
 /* DATA */
 
-const defaultData={
-Kirtan:{
-Ram:[],
-Krishna:[
-{title:"Bhajo Radhe Govinda",lyrics:"Bhajo Radhe Govinda\nRadhe Govinda Bhajo",likes:0}
-],
-Shiva:[
-{title:"Shiv Shambho",lyrics:"Shiv Shambho\nShiv Shambho",likes:0}
-]
-},
-Pooja:{},
+let data={
+Kirtan:{Krishna:[],Ram:[],Shiva:[]},
 Aarti:[],
 Mantras:[],
+Pooja:{},
 "Songs/Ghazals":[]
 };
 
-let data=JSON.parse(localStorage.getItem("kirtanData"))||defaultData;
-
-function saveData(){
-localStorage.setItem("kirtanData",JSON.stringify(data));
-}
+/* UI */
 
 const content=document.getElementById("content");
-const search=document.getElementById("search");
-const sortBtn=document.getElementById("sortBtn");
-const content=document.getElementById("content");
+const typeSelect=document.getElementById("typeSelect");
+const subSelect=document.getElementById("subSelect");
 const search=document.getElementById("search");
 const sortBtn=document.getElementById("sortBtn");
 
-/* ADD THIS PART */
-const typeSelect = document.getElementById("typeSelect");
-const subSelect = document.getElementById("subSelect");
-
-
-/* TYPE CHANGE */
-typeSelect.onchange = function(){
-
-currentType = this.value;
-currentSub = "";
-
-subSelect.innerHTML = "";
-subSelect.style.display = "none";
-
-/* If Kirtan show subs */
-if(currentType === "Kirtan"){
-
-subSelect.style.display = "inline";
-
-Object.keys(data.Kirtan).forEach(sub=>{
-const option = document.createElement("option");
-option.value = sub;
-option.textContent = sub;
-subSelect.appendChild(option);
-});
-
-currentSub = subSelect.value;
-}
-
-renderBoxes(getCurrentArray());
-};
-
-
-/* SUB CHANGE */
-subSelect.onchange = function(){
-
-currentSub = this.value;
-renderBoxes(getCurrentArray());
-
-};
-
-currentType = "Kirtan";
-currentSub = "Krishna";
+let currentType="Kirtan";
+let currentSub="Krishna";
 let sortAZ=true;
 
+/* SUB SELECT */
 
-/* GET CURRENT ARRAY */
+function loadSub(){
 
-function getCurrentArray(){
+subSelect.innerHTML="";
 
-  if(currentType === "Kirtan") {
-    return data.Kirtan[currentSub] || [];
-  }
+if(currentType==="Kirtan"){
 
-  if(currentType === "Pooja") {
-    return data.Pooja[currentSub] || [];
-  }
+["Krishna","Ram","Shiva"].forEach(s=>{
+let o=document.createElement("option");
+o.value=s;
+o.textContent=s;
+subSelect.appendChild(o);
+});
 
-  if(currentType === "Aarti") {
-    return data.Aarti;
-  }
+subSelect.style.display="inline";
+subSelect.value=currentSub;
 
-  if(currentType === "Mantras") {
-    return data.Mantras;
-  }
+}else{
 
-  if(currentType === "Songs/Ghazals") {
-    return data["Songs/Ghazals"];
-  }
+subSelect.style.display="none";
 
-  return [];
 }
 
+}
 
-/* RENDER BOXES */
+/* GET ARRAY */
 
-function renderBoxes(arr){
+function getArray(){
+
+if(currentType==="Kirtan") return data.Kirtan[currentSub];
+
+return data[currentType];
+
+}
+
+/* RENDER */
+
+function render(){
+
+let arr=[...getArray()];
 
 content.innerHTML="";
 
-let list=[...arr];
-
 if(search.value){
-list=list.filter(x=>
-x.title.toLowerCase().includes(search.value.toLowerCase())
-);
+
+arr=arr.filter(x=>x.title.toLowerCase().includes(search.value.toLowerCase()))
+
 }
 
-list.sort((a,b)=>
-sortAZ
-? a.title.localeCompare(b.title)
-: b.title.localeCompare(a.title)
-);
+arr.sort((a,b)=>sortAZ?a.title.localeCompare(b.title):b.title.localeCompare(a.title));
 
-list.forEach(item=>{
+arr.forEach(item=>{
 
-const box=document.createElement("div");
+let box=document.createElement("div");
 box.className="box";
 
-const leftDiv=document.createElement("div");
-leftDiv.className="boxLeft";
+box.innerHTML=`
+<div class="boxLeft">
+<div class="boxTitle">${item.title}</div>
+<div class="boxSnippet">${item.lyrics.split("\n")[0]}</div>
+</div>
+<div>
+<button onclick="like('${item.id}')">♡${item.likes}</button>
+<button onclick="edit('${item.id}')">✎</button>
+</div>
+`;
 
-const titleDiv=document.createElement("div");
-titleDiv.className="boxTitle";
-titleDiv.textContent=item.title;
-
-const snippet=document.createElement("div");
-snippet.className="boxSnippet";
-snippet.textContent=item.lyrics.split("\n").slice(0,2).join(" ");
-
-leftDiv.appendChild(titleDiv);
-leftDiv.appendChild(snippet);
-
-const btnDiv=document.createElement("div");
-btnDiv.className="boxButtons";
-
-const likeBtn=document.createElement("button");
-likeBtn.textContent=`♡${item.likes}`;
-
-likeBtn.onclick=(e)=>{
-e.stopPropagation();
-item.likes++;
-saveData();
-typeSelect.value = "Kirtan";
-subSelect.style.display = "inline";
-
-Object.keys(data.Kirtan).forEach(sub=>{
-const option=document.createElement("option");
-option.value=sub;
-option.textContent=sub;
-subSelect.appendChild(option);
-});
-
-subSelect.value="Krishna";
-
-renderBoxes(data.Kirtan["Krishna"]);
-};
-
-const editBtn=document.createElement("button");
-editBtn.textContent="✎";
-
-editBtn.onclick=(e)=>{
-e.stopPropagation();
-editItem(item);
-};
-
-btnDiv.appendChild(likeBtn);
-btnDiv.appendChild(editBtn);
-
-box.appendChild(leftDiv);
-box.appendChild(btnDiv);
-
-box.onclick=()=>renderFull(item);
+box.onclick=()=>view(item);
 
 content.appendChild(box);
 
@@ -345,103 +186,187 @@ content.appendChild(box);
 
 }
 
+/* FIREBASE LOAD */
 
-/* FULL VIEW */
+async function load(){
 
-function renderFull(item){
+const snap=await db.collection("kirtans").get();
 
-content.innerHTML=`
-<div class="fullView">
+snap.forEach(doc=>{
+let k=doc.data();
 
-<button onclick="goBack()">← Back</button>
-<button onclick="presentationMode('${item.title}','${item.lyrics}')">🎤 Presentation</button>
+if(k.type==="Kirtan"){
+data.Kirtan[k.sub].push(k)
+}else{
+data[k.type].push(k)
+}
 
-<h2>${item.title}</h2>
+});
 
-<p>${item.lyrics}</p>
-
-</div>
-`;
+render();
 
 }
 
+load();
+
+/* LIKE */
+
+async function like(id){
+
+let ref=db.collection("kirtans").doc(id);
+
+let d=await ref.get();
+
+await ref.update({likes:d.data().likes+1});
+
+location.reload();
+
+}
+
+/* VIEW */
+
+function view(item){
+
+content.innerHTML=`
+<button onclick="render()">← Back</button>
+<button onclick="presentation('${item.title}','${item.lyrics}')">🎤</button>
+<h2>${item.title}</h2>
+<p style="white-space:pre-line">${item.lyrics}</p>
+`;
+
+}
 
 /* PRESENTATION */
 
-function presentationMode(title,lyrics){
+function presentation(title,lyrics){
 
 content.innerHTML=`
-
-<div class="presentation">
-
-<button onclick="goBack()">← Exit</button>
-
+<button onclick="render()">Exit</button>
 <h2>${title}</h2>
-
-<p>${lyrics}</p>
-
-</div>
-
+<p class="presentation">${lyrics}</p>
 `;
 
 }
 
+/* ADD */
 
-/* BACK */
-
-function goBack(){
-renderBoxes(getCurrentArray());
-}
-
-
-/* EDIT */
-
-function editItem(item){
+document.getElementById("addBtn").onclick=function(){
 
 content.innerHTML=`
 
 <div class="form">
 
-<input id="editTitle" value="${item.title}">
+<input id="newTitle" placeholder="Title">
 
-<textarea id="editLyrics">${item.lyrics}</textarea>
+<textarea id="newLyrics" placeholder="Lyrics"></textarea>
 
-<button onclick="saveEdit('${item.title}')">Save</button>
+<button onclick="save()">Save</button>
 
-<button onclick="goBack()">Cancel</button>
+<button onclick="render()">Cancel</button>
 
 </div>
 
 `;
 
-window._editItem=item;
+};
+
+async function save(){
+
+let title=document.getElementById("newTitle").value;
+let lyrics=document.getElementById("newLyrics").value;
+
+await db.collection("kirtans").add({
+
+title,
+lyrics,
+likes:0,
+type:currentType,
+sub:currentSub
+
+});
+
+location.reload();
 
 }
 
+/* DROPDOWNS */
 
-function saveEdit(title){
+typeSelect.onchange=function(){
 
-let arr=getCurrentArray();
+currentType=this.value;
 
-const item=arr.find(x=>x.title===title)||window._editItem;
+loadSub();
 
-item.title=document.getElementById("editTitle").value;
-item.lyrics=document.getElementById("editLyrics").value;
+render();
 
-saveData();
+};
 
-goBack();
+subSelect.onchange=function(){
 
-}
+currentSub=this.value;
 
+render();
 
-/* INITIAL LOAD */
+};
 
-renderBoxes(getCurrentArray());
+/* SEARCH */
+
+document.getElementById("searchBtn").onclick=function(){
+
+search.style.display=search.style.display==="none"?"inline":"none";
+
+};
+
+/* SORT */
+
+sortBtn.onclick=function(){
+
+sortAZ=!sortAZ;
+
+render();
+
+};
+
+/* EXPORT */
+
+document.getElementById("exportBtn").onclick=function(){
+
+let file=new Blob([JSON.stringify(data)],{type:"application/json"});
+
+let a=document.createElement("a");
+
+a.href=URL.createObjectURL(file);
+
+a.download="kirtans.json";
+
+a.click();
+
+};
+
+/* IMPORT */
+
+document.getElementById("importFile").onchange=function(e){
+
+let reader=new FileReader();
+
+reader.onload=function(){
+
+data=JSON.parse(reader.result);
+
+render();
+
+};
+
+reader.readAsText(e.target.files[0]);
+
+};
+
+/* INIT */
+
+loadSub();
+render();
 
 </script>
 
 </body>
 </html>
-
-
