@@ -32,7 +32,24 @@ nav select:hover, nav select:focus { background-color: rgba(255,255,255,0.2); tr
 
 hr { border:0; height:1px; background-color:white; margin:0 40px 20px 40px; }
 #filterContainer { text-align:right; margin:0 40px 10px 40px; display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
-#filterBtn, #increaseFont, #decreaseFont { cursor:pointer; padding:5px 10px; border-radius:5px; border:none; background-color:black; color:white; font-weight:bold; margin-left:5px; }
+
+/* --- GLASS STYLE BUTTONS --- */
+#filterBtn, #increaseFont, #decreaseFont, #addLyricsBtn {
+  cursor:pointer;
+  padding:8px 15px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.3);
+  background-color: rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  color:black;
+  font-weight:bold;
+  transition: all 0.2s ease;
+}
+#filterBtn:hover, #increaseFont:hover, #decreaseFont:hover, #addLyricsBtn:hover {
+  background-color: rgba(255,255,255,0.2);
+  transform: scale(1.05);
+}
+
 #content { display:flex; flex-direction:column; align-items:center; max-width:900px; margin:0 auto; padding:0 20px; }
 
 /* --- BOXES --- */
@@ -95,8 +112,8 @@ hr { border:0; height:1px; background-color:white; margin:0 40px 20px 40px; }
 const data = {
   aarti: [],
   mantras: [],
-  kirtan: { Krishna:[], Ram:[], Durga:[], Ganesh:[], Hanuman:[], "Other Languages":[] },
-  pooja: { Ramayan:[], "Bhagvat Katha":[], Janamashtami:[], Navratri:[], Navmi:[], Shivratri:[] }
+  kirtan: { Ram:[], Krishna:[], Durga:[], Shiva:[], Ganesh:[], Hanuman:[], Naam:[] },
+  pooja: { Ramayan:[], "Bhagvat Katha":[], Navratri:[], Navmi:[], Shivratri:[], Janamashtami:[], "Ganesh Chathurthi":[] }
 };
 
 // --- STATE ---
@@ -127,13 +144,16 @@ function renderBoxes(items){
     const title = document.createElement("div");
     title.className="boxTitle"; title.textContent=item.title;
     const snippet = document.createElement("div");
-    snippet.className="boxSnippet"; snippet.textContent=item.lyrics.split("\n")[0]+(item.lyrics.split("\n")[1]?"...":"");
+    snippet.className="boxSnippet"; 
+    snippet.style.fontSize = lyricFontSize + "px";
+    snippet.textContent=item.lyrics.split("\n")[0]+(item.lyrics.split("\n")[1]?"...":"");
     boxContent.appendChild(title); boxContent.appendChild(snippet);
     boxContent.addEventListener("click", ()=>renderFullPage(item));
+    
     const boxLikes=document.createElement("div"); boxLikes.className="boxLikes";
     item.likes=item.likes||0; item.liked=item.liked||false;
     const likeBtn=document.createElement("button");
-    likeBtn.className="likeBtn"+(item.liked?" liked":""); likeBtn.textContent="♥";
+    likeBtn.className="likeBtn"+(item.liked?" liked":""); likeBtn.textContent=item.liked?"❤":"♡";
     const likeCount=document.createElement("div"); likeCount.className="likeCount"; likeCount.textContent=item.likes;
     likeBtn.addEventListener("click",(e)=>{e.stopPropagation(); item.liked=!item.liked; item.likes+=item.liked?1:-1; likeBtn.className="likeBtn"+(item.liked?" liked":""); likeBtn.textContent=item.liked?"❤":"♡"; likeCount.textContent=item.likes; });
     const editBtn=document.createElement("button"); editBtn.className="editBtn"; editBtn.textContent="✏";
@@ -209,36 +229,51 @@ function updateAddSubOptions(){
 }
 
 // --- SAVE/CANCEL FUNCTIONS ---
-function cancelEditForm(){ pageTitle.textContent="Kirtan Lyrics"; typeSelect.style.display="inline-block"; subSelect.style.display=(currentType==="kirtan"||currentType==="pooja")?"inline-block":"none"; filterBtn.style.display="inline-block"; document.getElementById("addLyricsBtn").style.display="inline-block"; attachAddLyricsBtnListener(); if(currentType && !currentSub){ if(currentType==="aarti") renderBoxes(data.aarti); else if(currentType==="mantras") renderBoxes(data.mantras);} else if(currentType && currentSub){ if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); } else contentDiv.innerHTML=""; }
+function cancelEditForm(){ 
+  pageTitle.textContent="Kirtan Lyrics"; 
+  typeSelect.style.display="inline-block"; 
+  subSelect.style.display=(currentType==="kirtan"||currentType==="pooja")?"inline-block":"none"; 
+  filterBtn.style.display="inline-block"; 
+  document.getElementById("addLyricsBtn").style.display="inline-block"; 
+  attachAddLyricsBtnListener(); 
+  if(currentType && !currentSub){ 
+    if(currentType==="aarti") renderBoxes(data.aarti); 
+    else if(currentType==="mantras") renderBoxes(data.mantras);
+  } else if(currentType && currentSub){ 
+    if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); 
+    else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); 
+  } else contentDiv.innerHTML=""; 
+}
+
 document.getElementById("addLyricsBtn").addEventListener("click", openAddForm);
 
 // --- TYPE SELECTION ---
 function renderType(type){
   currentType=type.toLowerCase(); currentSub="";
   filterBtn.style.display="inline-block";
-  if(currentType==="kirtan"){ subSelect.style.display="inline-block"; subSelect.innerHTML=`<option value="">Select Deity</option>`; Object.keys(data.kirtan).forEach(d=>{ const o=document.createElement("option"); o.value=d; o.textContent=d; subSelect.appendChild(o); }); contentDiv.innerHTML=""; }
-  else if(currentType==="pooja"){ subSelect.style.display="inline-block"; subSelect.innerHTML=`<option value="">Select Occasion</option>`; Object.keys(data.pooja).forEach(p=>{ const o=document.createElement("option"); o.value=p; o.textContent=p; subSelect.appendChild(o); }); contentDiv.innerHTML=""; }
-  else{ subSelect.style.display="none"; if(currentType==="aarti") renderBoxes(data.aarti); else if(currentType==="mantras") renderBoxes(data.mantras); }
+  if(currentType==="kirtan"){ 
+    subSelect.style.display="inline-block"; 
+    subSelect.innerHTML=`<option value="">Select Deity</option>`; 
+    ["Ram","Krishna","Durga","Shiva","Ganesh","Hanuman","Naam"].forEach(d=>{ const o=document.createElement("option"); o.value=d; o.textContent=d; subSelect.appendChild(o); }); 
+    contentDiv.innerHTML=""; 
+  } else if(currentType==="pooja"){ 
+    subSelect.style.display="inline-block"; 
+    subSelect.innerHTML=`<option value="">Select Occasion</option>`; 
+    ["Ramayan","Bhagvat Katha","Navratri","Navmi","Shivratri","Janamashtami","Ganesh Chathurthi"].forEach(p=>{ const o=document.createElement("option"); o.value=p; o.textContent=p; subSelect.appendChild(o); }); 
+    contentDiv.innerHTML=""; 
+  } else{ 
+    subSelect.style.display="none"; 
+    if(currentType==="aarti") renderBoxes(data.aarti); 
+    else if(currentType==="mantras") renderBoxes(data.mantras); 
+  }
 }
 
 // --- EVENT LISTENERS ---
 typeSelect.addEventListener("change", e=>renderType(e.target.value));
-subSelect.addEventListener("change", e=>{ currentSub=e.target.value; if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); });
-filterBtn.addEventListener("click", ()=>{ isAZ=!isAZ; filterBtn.textContent=isAZ?"Sort A → Z":"Sort Z → A"; if(currentType && (!currentSub || currentType==="aarti" || currentType==="mantras")){ if(currentType==="aarti") renderBoxes(data.aarti); else if(currentType==="mantras") renderBoxes(data.mantras); } else if(currentType && currentSub){ if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); } });
-increaseFont.addEventListener("click", ()=>{ lyricFontSize+=2; if(currentType && currentSub){ if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); }});
-decreaseFont.addEventListener("click", ()=>{ lyricFontSize-=2; if(currentType && currentSub){ if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); }});
-
-// --- ADD LYRICS BUTTON ---
-function attachAddLyricsBtnListener(){ document.getElementById("addLyricsBtn").addEventListener("click", openAddForm); }
-attachAddLyricsBtnListener();
-
-// --- UPDATE SUB OPTIONS ON ADD FORM TYPE CHANGE ---
-document.addEventListener("change", e=>{ if(e.target.id==="editType") updateAddSubOptions(); });
-
-// --- SAVE EDIT/ADD ---
-function saveEditForm(itemStr){ const item=JSON.parse(itemStr); item.title=document.getElementById("editTitle").value; item.lyrics=document.getElementById("editLyrics").value; const newType=document.getElementById("editType").value.toLowerCase(); const newSub=document.getElementById("editSub").value; // remove from old place if(currentType==="kirtan") data.kirtan[currentSub]=data.kirtan[currentSub].filter(i=>i.title!==item.title); else if(currentType==="pooja") data.pooja[currentSub]=data.pooja[currentSub].filter(i=>i.title!==item.title); else data[currentType]=data[currentType].filter(i=>i.title!==item.title); // add to new place if(newType==="kirtan") data.kirtan[newSub].push(item); else if(newType==="pooja") data.pooja[newSub].push(item); else data[newType].push(item); cancelEditForm(); }
-function saveAddForm(){ const title=document.getElementById("editTitle").value; const lyrics=document.getElementById("editLyrics").value; const type=document.getElementById("editType").value.toLowerCase(); const sub=document.getElementById("editSub").value; const item={title,lyrics,likes:0,liked:false}; if(type==="kirtan") data.kirtan[sub].push(item); else if(type==="pooja") data.pooja[sub].push(item); else data[type].push(item); cancelEditForm(); }
-
-</script>
-</body>
-</html>
+subSelect.addEventListener("change", e=>{ 
+  currentSub=e.target.value; 
+  if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); 
+  else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); 
+});
+filterBtn.addEventListener("click", ()=>{
+  isAZ=!isAZ;
