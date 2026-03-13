@@ -6,6 +6,62 @@
 <title>Kirtan Lyrics</title>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
+  /* Glass-style inputs, buttons, selects, textareas */
+button, select, input, textarea {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  border: none;
+  border-radius: 16px;
+  padding: 10px 16px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 16px;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover, select:hover, input:hover, textarea:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Card boxes */
+.box {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease-in-out;
+}
+
+.box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Edit/Like/Delete buttons (black outline) */
+.boxButtons button {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid #000;
+  border-radius: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-family: 'Patrick Hand', cursive;
+  transition: all 0.2s;
+}
+
+.boxButtons button:hover {
+  background: rgba(255,255,255,0.35);
+  transform: translateY(-1px);
+}
   body { font-family:'Patrick Hand', cursive; background:#fff; color:#000; margin:0; padding:0; }
   header{ display:flex; justify-content:space-between; align-items:center; padding:20px; flex-wrap:wrap; }
   header h1{ margin:0; font-size:36px; }
@@ -279,3 +335,4 @@ renderRecentlyOpened();
 </script>
 </body>
 </html>
+
