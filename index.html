@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kirtan Lyrics</title>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:cursive;background:#f5f5f5}
+*{box-sizing:border-box;}
+
+body{
+margin:0;
+font-family:cursive;
+background:#f5f5f5;
+}
 
 header{
 display:flex;
@@ -18,7 +20,7 @@ flex-wrap:wrap;
 gap:10px;
 justify-content:space-between;
 align-items:center;
-padding:20px
+padding:20px;
 }
 
 button,select,input{
@@ -28,7 +30,12 @@ background:rgba(255,255,255,0.25);
 backdrop-filter:blur(10px);
 padding:8px 12px;
 font-family:cursive;
-cursor:pointer
+cursor:pointer;
+transition:.3s;
+}
+
+button:hover,select:hover,input:hover{
+background:rgba(255,255,255,0.4);
 }
 
 #content{
@@ -37,23 +44,61 @@ margin:auto;
 padding:20px;
 display:flex;
 flex-direction:column;
-gap:12px
+gap:12px;
 }
 
 .box{
 display:flex;
 justify-content:space-between;
+align-items:flex-start;
 padding:16px;
 border-radius:16px;
 background:rgba(255,255,255,0.35);
-cursor:pointer
+backdrop-filter:blur(12px);
+cursor:pointer;
 }
 
-.boxLeft{display:flex;flex-direction:column}
-.boxTitle{font-size:20px;font-weight:bold}
-.boxSnippet{font-size:16px;color:rgba(0,0,0,0.6)}
+.boxLeft{
+display:flex;
+flex-direction:column;
+flex:1;
+}
 
-textarea{height:150px}
+.boxTitle{
+font-size:20px;
+font-weight:bold;
+text-align:left;
+}
+
+.boxSnippet{
+font-size:16px;
+color:rgba(0,0,0,0.6);
+font-style:italic;
+line-height:1.3;
+margin-top:4px;
+text-align:left;
+}
+
+.boxButtons{
+display:flex;
+gap:6px;
+}
+
+.fullView h2{
+font-size:28px;
+}
+
+.fullView p{
+white-space:pre-line;
+font-size:20px;
+line-height:1.7;
+}
+
+.presentation p{
+font-size:42px;
+text-align:center;
+line-height:1.8;
+}
 
 .form{
 background:white;
@@ -61,12 +106,16 @@ padding:20px;
 border-radius:16px;
 display:flex;
 flex-direction:column;
-gap:10px
+gap:10px;
 }
 
-.presentation{
-font-size:42px;
-text-align:center
+textarea{
+height:160px;
+resize:vertical;
+}
+
+#search{
+display:none;
 }
 </style>
 </head>
@@ -78,6 +127,7 @@ text-align:center
 <h1 onclick="location.reload()">Kirtan Lyrics</h1>
 
 <select id="typeSelect">
+<option value="">Type</option>
 <option value="Kirtan">Kirtan</option>
 <option value="Aarti">Aarti</option>
 <option value="Mantras">Mantras</option>
@@ -85,13 +135,14 @@ text-align:center
 <option value="Songs/Ghazals">Songs/Ghazals</option>
 </select>
 
-<select id="subSelect"></select>
+<select id="subSelect" style="display:none"></select>
 
 <button id="searchBtn">🔍</button>
-<input id="search" placeholder="Search" style="display:none">
+<input id="search" placeholder="Search">
 
 <button id="sortBtn">A→Z</button>
 <button id="addBtn">+ Add</button>
+
 <button id="exportBtn">Export</button>
 
 <input type="file" id="importFile" style="display:none">
@@ -103,128 +154,135 @@ text-align:center
 
 <script>
 
-/* FIREBASE CONFIG */
-
-const firebaseConfig={
-apiKey:"YOUR_API_KEY",
-authDomain:"YOUR_DOMAIN",
-projectId:"YOUR_PROJECT_ID"
-};
-
-const app=firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
-
-/* DATA STRUCTURE */
+/* DATA */
 
 const defaultData={
 Kirtan:{
 Ram:[],
-Krishna:[],
-Durga:[],
-Shiva:[],
-Ganesh:[],
-Hanuman:[],
-Marni:[]
+Krishna:[
+{title:"Bhajo Radhe Govinda",lyrics:"Bhajo Radhe Govinda\nRadhe Govinda Bhajo",likes:0}
+],
+Shiva:[
+{title:"Shiv Shambho",lyrics:"Shiv Shambho\nShiv Shambho",likes:0}
+]
 },
-
-Pooja:{
-Ramayan:[],
-BhagvatKatha:[],
-Navratri:[],
-Navmi:[],
-Shivratri:[]
-},
-
+Pooja:{},
 Aarti:[],
 Mantras:[],
 "Songs/Ghazals":[]
 };
 
-let data=JSON.parse(JSON.stringify(defaultData));
+let data=JSON.parse(localStorage.getItem("kirtanData"))||defaultData;
 
-/* UI */
+function saveData(){
+localStorage.setItem("kirtanData",JSON.stringify(data));
+}
 
 const content=document.getElementById("content");
-const typeSelect=document.getElementById("typeSelect");
-const subSelect=document.getElementById("subSelect");
 const search=document.getElementById("search");
 const sortBtn=document.getElementById("sortBtn");
 
 let currentType="Kirtan";
-let currentSub="Ram";
+let currentSub="Krishna";
 let sortAZ=true;
 
-/* LOAD SUB OPTIONS */
-
-function loadSub(){
-
-subSelect.innerHTML="";
-subSelect.style.display="none";
-
-let section=defaultData[currentType];
-
-if(section && typeof section==="object" && !Array.isArray(section)){
-
-subSelect.style.display="inline";
-
-Object.keys(section).forEach(sub=>{
-let option=document.createElement("option");
-option.value=sub;
-option.textContent=sub;
-subSelect.appendChild(option);
-});
-
-currentSub=subSelect.value;
-
-}
-
-}
 
 /* GET CURRENT ARRAY */
 
-function getArray(){
+function getCurrentArray(){
 
-let section=data[currentType];
+if(currentType==="Kirtan"){
+return data.Kirtan[currentSub]||[];
+}
 
-if(Array.isArray(section)) return section;
+if(currentType==="Pooja"){
+return data.Pooja[currentSub]||[];
+}
 
-if(section && currentSub) return section[currentSub];
+if(currentType==="Aarti"){
+return data.Aarti;
+}
 
-return [];
+if(currentType==="Mantras"){
+return data.Mantras;
+}
+
+if(currentType==="Songs/Ghazals"){
+return data["Songs/Ghazals"];
+}
+
+return[];
 
 }
 
-/* RENDER LIST */
 
-function render(){
+/* RENDER BOXES */
 
-let arr=[...getArray()];
+function renderBoxes(arr){
 
 content.innerHTML="";
 
+let list=[...arr];
+
 if(search.value){
-arr=arr.filter(x=>x.title.toLowerCase().includes(search.value.toLowerCase()))
+list=list.filter(x=>
+x.title.toLowerCase().includes(search.value.toLowerCase())
+);
 }
 
-arr.sort((a,b)=>sortAZ?a.title.localeCompare(b.title):b.title.localeCompare(a.title));
+list.sort((a,b)=>
+sortAZ
+? a.title.localeCompare(b.title)
+: b.title.localeCompare(a.title)
+);
 
-arr.forEach(item=>{
+list.forEach(item=>{
 
-let box=document.createElement("div");
+const box=document.createElement("div");
 box.className="box";
 
-box.innerHTML=`
-<div class="boxLeft">
-<div class="boxTitle">${item.title}</div>
-<div class="boxSnippet">${item.lyrics.split("\n")[0]}</div>
-</div>
+const leftDiv=document.createElement("div");
+leftDiv.className="boxLeft";
 
-<div>
-<button onclick="event.stopPropagation();like('${item.id}')">♡ ${item.likes}</button>
-</div>
-`;
+const titleDiv=document.createElement("div");
+titleDiv.className="boxTitle";
+titleDiv.textContent=item.title;
 
-box.onclick=()=>view(item);
+const snippet=document.createElement("div");
+snippet.className="boxSnippet";
+snippet.textContent=item.lyrics.split("\n").slice(0,2).join(" ");
+
+leftDiv.appendChild(titleDiv);
+leftDiv.appendChild(snippet);
+
+const btnDiv=document.createElement("div");
+btnDiv.className="boxButtons";
+
+const likeBtn=document.createElement("button");
+likeBtn.textContent=`♡${item.likes}`;
+
+likeBtn.onclick=(e)=>{
+e.stopPropagation();
+item.likes++;
+saveData();
+renderBoxes(getCurrentArray());
+};
+
+const editBtn=document.createElement("button");
+editBtn.textContent="✎";
+
+editBtn.onclick=(e)=>{
+e.stopPropagation();
+editItem(item);
+};
+
+btnDiv.appendChild(likeBtn);
+btnDiv.appendChild(editBtn);
+
+box.appendChild(leftDiv);
+box.appendChild(btnDiv);
+
+box.onclick=()=>renderFull(item);
 
 content.appendChild(box);
 
@@ -232,188 +290,99 @@ content.appendChild(box);
 
 }
 
-/* FIREBASE LOAD */
 
-async function load(){
+/* FULL VIEW */
 
-const snap=await db.collection("kirtans").get();
-
-snap.forEach(doc=>{
-
-let k=doc.data();
-k.id=doc.id;
-
-if(k.type==="Kirtan" || k.type==="Pooja"){
-
-if(data[k.type] && data[k.type][k.sub]){
-data[k.type][k.sub].push(k)
-}
-
-}else{
-
-if(data[k.type]){
-data[k.type].push(k)
-}
-
-}
-
-});
-
-render();
-
-}
-
-load();
-
-/* LIKE */
-
-async function like(id){
-
-let ref=db.collection("kirtans").doc(id);
-
-let d=await ref.get();
-
-await ref.update({likes:d.data().likes+1});
-
-location.reload();
-
-}
-
-/* VIEW PAGE */
-
-function view(item){
+function renderFull(item){
 
 content.innerHTML=`
-<button onclick="render()">← Back</button>
-<button onclick="presentation('${item.title}','${item.lyrics}')">🎤 Presentation</button>
+<div class="fullView">
+
+<button onclick="goBack()">← Back</button>
+<button onclick="presentationMode('${item.title}','${item.lyrics}')">🎤 Presentation</button>
+
 <h2>${item.title}</h2>
-<p style="white-space:pre-line">${item.lyrics}</p>
+
+<p>${item.lyrics}</p>
+
+</div>
 `;
 
 }
 
-/* PRESENTATION MODE */
 
-function presentation(title,lyrics){
+/* PRESENTATION */
+
+function presentationMode(title,lyrics){
 
 content.innerHTML=`
-<button onclick="render()">Exit</button>
+
+<div class="presentation">
+
+<button onclick="goBack()">← Exit</button>
+
 <h2>${title}</h2>
-<p class="presentation">${lyrics}</p>
-`;
 
-}
-
-/* ADD FORM */
-
-document.getElementById("addBtn").onclick=function(){
-
-content.innerHTML=`
-
-<div class="form">
-
-<input id="newTitle" placeholder="Title">
-
-<textarea id="newLyrics" placeholder="Lyrics"></textarea>
-
-<button onclick="save()">Save</button>
-<button onclick="render()">Cancel</button>
+<p>${lyrics}</p>
 
 </div>
 
 `;
 
-};
+}
 
-async function save(){
 
-let title=document.getElementById("newTitle").value;
-let lyrics=document.getElementById("newLyrics").value;
+/* BACK */
 
-await db.collection("kirtans").add({
+function goBack(){
+renderBoxes(getCurrentArray());
+}
 
-title,
-lyrics,
-likes:0,
-type:currentType,
-sub:currentSub
 
-});
+/* EDIT */
 
-location.reload();
+function editItem(item){
+
+content.innerHTML=`
+
+<div class="form">
+
+<input id="editTitle" value="${item.title}">
+
+<textarea id="editLyrics">${item.lyrics}</textarea>
+
+<button onclick="saveEdit('${item.title}')">Save</button>
+
+<button onclick="goBack()">Cancel</button>
+
+</div>
+
+`;
+
+window._editItem=item;
 
 }
 
-/* DROPDOWNS */
 
-typeSelect.onchange=function(){
+function saveEdit(title){
 
-currentType=this.value;
-loadSub();
-render();
+let arr=getCurrentArray();
 
-};
+const item=arr.find(x=>x.title===title)||window._editItem;
 
-subSelect.onchange=function(){
+item.title=document.getElementById("editTitle").value;
+item.lyrics=document.getElementById("editLyrics").value;
 
-currentSub=this.value;
-render();
+saveData();
 
-};
+goBack();
 
-/* SEARCH */
+}
 
-document.getElementById("searchBtn").onclick=function(){
 
-search.style.display=search.style.display==="none"?"inline":"none";
+/* INITIAL LOAD */
 
-};
-
-/* SORT */
-
-sortBtn.onclick=function(){
-
-sortAZ=!sortAZ;
-render();
-
-};
-
-/* EXPORT */
-
-document.getElementById("exportBtn").onclick=function(){
-
-let file=new Blob([JSON.stringify(data)],{type:"application/json"});
-
-let a=document.createElement("a");
-
-a.href=URL.createObjectURL(file);
-a.download="kirtans.json";
-
-a.click();
-
-};
-
-/* IMPORT */
-
-document.getElementById("importFile").onchange=function(e){
-
-let reader=new FileReader();
-
-reader.onload=function(){
-
-data=JSON.parse(reader.result);
-render();
-
-};
-
-reader.readAsText(e.target.files[0]);
-
-};
-
-/* INIT */
-
-loadSub();
-render();
+renderBoxes(getCurrentArray());
 
 </script>
 
