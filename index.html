@@ -11,7 +11,15 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:cursive;background:#f5f5f5}
-header{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;padding:20px}
+
+header{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+justify-content:space-between;
+align-items:center;
+padding:20px
+}
 
 button,select,input{
 border-radius:12px;
@@ -20,10 +28,17 @@ background:rgba(255,255,255,0.25);
 backdrop-filter:blur(10px);
 padding:8px 12px;
 font-family:cursive;
-cursor:pointer;
+cursor:pointer
 }
 
-#content{max-width:900px;margin:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
+#content{
+max-width:900px;
+margin:auto;
+padding:20px;
+display:flex;
+flex-direction:column;
+gap:12px
+}
 
 .box{
 display:flex;
@@ -39,9 +54,20 @@ cursor:pointer
 .boxSnippet{font-size:16px;color:rgba(0,0,0,0.6)}
 
 textarea{height:150px}
-.form{background:white;padding:20px;border-radius:16px;display:flex;flex-direction:column;gap:10px}
 
-.presentation p{font-size:42px;text-align:center}
+.form{
+background:white;
+padding:20px;
+border-radius:16px;
+display:flex;
+flex-direction:column;
+gap:10px
+}
+
+.presentation{
+font-size:42px;
+text-align:center
+}
 </style>
 </head>
 
@@ -88,10 +114,9 @@ projectId:"YOUR_PROJECT_ID"
 const app=firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 
-/* DATA */
+/* DATA STRUCTURE */
 
 const defaultData={
-Type
 Kirtan:{
 Ram:[],
 Krishna:[],
@@ -115,6 +140,8 @@ Mantras:[],
 "Songs/Ghazals":[]
 };
 
+let data=JSON.parse(JSON.stringify(defaultData));
+
 /* UI */
 
 const content=document.getElementById("content");
@@ -124,46 +151,50 @@ const search=document.getElementById("search");
 const sortBtn=document.getElementById("sortBtn");
 
 let currentType="Kirtan";
-let currentSub="Krishna";
+let currentSub="Ram";
 let sortAZ=true;
 
-/* SUB SELECT */
+/* LOAD SUB OPTIONS */
 
 function loadSub(){
 
 subSelect.innerHTML="";
-
-if(currentType==="Kirtan"){
-
-["Krishna","Ram","Shiva"].forEach(s=>{
-let o=document.createElement("option");
-o.value=s;
-o.textContent=s;
-subSelect.appendChild(o);
-});
-
-subSelect.style.display="inline";
-subSelect.value=currentSub;
-
-}else{
-
 subSelect.style.display="none";
 
-}
+let section=defaultData[currentType];
+
+if(section && typeof section==="object" && !Array.isArray(section)){
+
+subSelect.style.display="inline";
+
+Object.keys(section).forEach(sub=>{
+let option=document.createElement("option");
+option.value=sub;
+option.textContent=sub;
+subSelect.appendChild(option);
+});
+
+currentSub=subSelect.value;
 
 }
 
-/* GET ARRAY */
+}
+
+/* GET CURRENT ARRAY */
 
 function getArray(){
 
-if(currentType==="Kirtan") return data.Kirtan[currentSub];
+let section=data[currentType];
 
-return data[currentType];
+if(Array.isArray(section)) return section;
+
+if(section && currentSub) return section[currentSub];
+
+return [];
 
 }
 
-/* RENDER */
+/* RENDER LIST */
 
 function render(){
 
@@ -172,9 +203,7 @@ let arr=[...getArray()];
 content.innerHTML="";
 
 if(search.value){
-
 arr=arr.filter(x=>x.title.toLowerCase().includes(search.value.toLowerCase()))
-
 }
 
 arr.sort((a,b)=>sortAZ?a.title.localeCompare(b.title):b.title.localeCompare(a.title));
@@ -189,9 +218,9 @@ box.innerHTML=`
 <div class="boxTitle">${item.title}</div>
 <div class="boxSnippet">${item.lyrics.split("\n")[0]}</div>
 </div>
+
 <div>
-<button onclick="like('${item.id}')">♡${item.likes}</button>
-<button onclick="edit('${item.id}')">✎</button>
+<button onclick="event.stopPropagation();like('${item.id}')">♡ ${item.likes}</button>
 </div>
 `;
 
@@ -210,12 +239,22 @@ async function load(){
 const snap=await db.collection("kirtans").get();
 
 snap.forEach(doc=>{
-let k=doc.data();
 
-if(k.type==="Kirtan"){
-data.Kirtan[k.sub].push(k)
+let k=doc.data();
+k.id=doc.id;
+
+if(k.type==="Kirtan" || k.type==="Pooja"){
+
+if(data[k.type] && data[k.type][k.sub]){
+data[k.type][k.sub].push(k)
+}
+
 }else{
+
+if(data[k.type]){
 data[k.type].push(k)
+}
+
 }
 
 });
@@ -240,20 +279,20 @@ location.reload();
 
 }
 
-/* VIEW */
+/* VIEW PAGE */
 
 function view(item){
 
 content.innerHTML=`
 <button onclick="render()">← Back</button>
-<button onclick="presentation('${item.title}','${item.lyrics}')">🎤</button>
+<button onclick="presentation('${item.title}','${item.lyrics}')">🎤 Presentation</button>
 <h2>${item.title}</h2>
 <p style="white-space:pre-line">${item.lyrics}</p>
 `;
 
 }
 
-/* PRESENTATION */
+/* PRESENTATION MODE */
 
 function presentation(title,lyrics){
 
@@ -265,7 +304,7 @@ content.innerHTML=`
 
 }
 
-/* ADD */
+/* ADD FORM */
 
 document.getElementById("addBtn").onclick=function(){
 
@@ -278,7 +317,6 @@ content.innerHTML=`
 <textarea id="newLyrics" placeholder="Lyrics"></textarea>
 
 <button onclick="save()">Save</button>
-
 <button onclick="render()">Cancel</button>
 
 </div>
@@ -311,9 +349,7 @@ location.reload();
 typeSelect.onchange=function(){
 
 currentType=this.value;
-
 loadSub();
-
 render();
 
 };
@@ -321,7 +357,6 @@ render();
 subSelect.onchange=function(){
 
 currentSub=this.value;
-
 render();
 
 };
@@ -339,7 +374,6 @@ search.style.display=search.style.display==="none"?"inline":"none";
 sortBtn.onclick=function(){
 
 sortAZ=!sortAZ;
-
 render();
 
 };
@@ -353,7 +387,6 @@ let file=new Blob([JSON.stringify(data)],{type:"application/json"});
 let a=document.createElement("a");
 
 a.href=URL.createObjectURL(file);
-
 a.download="kirtans.json";
 
 a.click();
@@ -369,7 +402,6 @@ let reader=new FileReader();
 reader.onload=function(){
 
 data=JSON.parse(reader.result);
-
 render();
 
 };
@@ -387,5 +419,3 @@ render();
 
 </body>
 </html>
-
-
