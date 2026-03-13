@@ -2,389 +2,194 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Kirtan Lyrics</title>
+<meta name="description" content="Browse and share beautiful Kirtan, Aarti, and Mantras lyrics. Add, edit, and manage your favorite devotional lyrics.">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:title" content="Kirtan Lyrics">
+<meta property="og:description" content="Beautiful collection of Kirtan, Aarti, and Mantras lyrics">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:description" content="Browse and share Kirtan lyrics collection">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <style>
-*{box-sizing:border-box;}
+/* ==== GENERAL ==== */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: cursive;
+  background-color: #ffffff;
+  color: #000;
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+}
+header { display:flex; justify-content:space-between; align-items:center; padding:20px 40px; flex-wrap:wrap; gap:10px; }
+header h1 { margin:0; font-size:36px; cursor:pointer; flex:1 1 auto; min-width:150px; }
+nav { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-right:auto; margin-top:auto; }
+nav select {
+  margin-left:10px; font-size:16px; padding:8px 12px; border-radius:12px; border:none;
+  background-color: rgba(255,255,255,0.1); backdrop-filter: blur(8px); color: rgb(143,143,143); cursor:pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+nav select:hover, nav select:focus { background-color: rgba(255,255,255,0.2); transform: scale(1.02); outline:none; }
+#searchContainer { display:flex; align-items:center; position:relative; }
+#searchIcon { background: rgba(255,255,255,0.15); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.3); border-radius:14px; padding:10px; cursor:pointer; }
+#searchInput { width:0; opacity:0; margin-left:8px; border:none; border-radius:14px; padding:10px; background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); transition:all .3s ease; }
+#searchContainer.active #searchInput { width:180px; opacity:1; }
+hr { border:0; height:1px; background-color:white; margin:0 40px 20px 40px; }
+#filterContainer { display:flex; justify-content:flex-end; gap:8px; margin:0 40px 10px 40px; flex-wrap:wrap; }
+#filterBtn, #increaseFont, #decreaseFont { cursor:pointer; padding:5px 10px; border-radius:5px; border:none; font-weight:bold; }
+#filterBtn { background:white; color:black; white-space:nowrap; }
+#increaseFont, #decreaseFont { background:black; color:white; margin-left:5px; }
+#addLyricsBtn { margin-left:10px; font-size:16px; padding:10px 16px; border-radius:14px; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); color:rgb(143,143,143); cursor:pointer; transition:all .25s ease; }
+#addLyricsBtn:hover { background: rgba(255,255,255,0.25); transform: translateY(-1px); }
 
-body{
-margin:0;
-font-family:cursive;
-background:#f5f5f5;
+#content { display:flex; flex-direction:column; align-items:center; max-width:900px; margin:0 auto; padding:0 20px; }
+.box { background:rgba(255,255,255,0.1); backdrop-filter:blur(10px); border-radius:15px; width:100%; padding:15px; margin-bottom:10px; cursor:pointer; transition: transform 0.2s ease, background 0.3s ease; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; min-height:80px; }
+.box:hover { transform:scale(1.02); background:rgba(255,255,255,0.2); }
+.boxContent { flex-grow:1; cursor:pointer; }
+.boxTitle { font-weight:bold; font-size:20px; }
+.boxSnippet { font-size:16px; color:lightgray; margin-top:5px; }
+.boxLikes { flex-shrink:0; text-align:center; padding:0 15px; cursor:default; }
+.likeBtn, .editBtn { background-color: rgba(255,255,255,0.1); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:6px 8px; font-size:14px; transition: background 0.2s, transform 0.1s; cursor:pointer; }
+.likeBtn:hover, .editBtn:hover { background-color: rgba(255,255,255,0.2); transform: scale(1.1); }
+.likeBtn.liked { background-color: rgba(255,100,100,0.2); }
+.likeCount { font-size:14px; color:lightgray; margin-top:5px; }
+.boxActions { display:flex; gap:10px; align-items:center; cursor:default; }
+
+.fullView h2 { font-size:32px; text-align:left; margin-left:40px; }
+.fullView p { font-size:20px; margin:20px 40px; white-space:pre-line; line-height:1.6; }
+
+.editForm { background:rgba(255,255,255,0.1); backdrop-filter:blur(10px); border-radius:15px; padding:20px; max-width:600px; margin:20px auto; border:1px solid rgba(255,255,255,0.2); }
+.editForm input, .editForm textarea, .editForm select { width:100%; padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.05); color:black; font-family:cursive; font-size:14px; box-sizing:border-box; }
+.editForm textarea { min-height:200px; resize:vertical; }
+.editForm button { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); border-radius:8px; padding:10px 15px; margin-right:10px; cursor:pointer; font-weight:bold; transition:background 0.2s; color:black; }
+.editForm button:hover { background:rgba(255,255,255,0.3); }
+
+/* ==== RESPONSIVE ==== */
+@media (max-width:768px){
+  header { padding:15px 20px; }
+  header h1 { font-size:24px; }
+  nav select { margin-left:5px; font-size:14px; padding:6px 10px; }
+  hr { margin:0 20px 15px 20px; }
+  #filterContainer { margin:0 20px 10px 20px; }
+  #content { padding:0 10px; }
+  .fullView h2 { font-size:22px; margin-left:20px; }
+  .fullView p { font-size:16px; margin:15px 20px; }
+  .boxTitle { font-size:16px; }
+  .boxSnippet { font-size:14px; }
+  .box { padding:12px; min-height:auto; }
+  .boxActions { flex-wrap:wrap; width:100%; margin-top:10px; gap:6px; }
+}
+@media (max-width:480px){
+  header { flex-direction:column; padding:10px 15px; text-align:center; }
+  header h1 { font-size:20px; width:100%; }
+  nav { width:100%; justify-content:center; }
+  nav select { font-size:12px; padding:5px 8px; }
+  #filterContainer { margin:0 15px 8px 15px; justify-content:center; }
+  #filterBtn,#increaseFont,#decreaseFont { font-size:12px; padding:4px 8px; }
+  .fullView h2 { margin-left:15px; font-size:20px; }
+  .fullView p { margin:10px 15px; font-size:14px; }
+  .editForm { margin:10px 15px; }
 }
 
-header{
-display:flex;
-flex-wrap:wrap;
-gap:10px;
-justify-content:space-between;
-align-items:center;
-padding:20px;
-}
-
-button,select,input{
-border-radius:12px;
-border:1px solid rgba(255,255,255,0.4);
-background:rgba(255,255,255,0.25);
-backdrop-filter:blur(10px);
-padding:8px 12px;
-font-family:cursive;
-cursor:pointer;
-transition:.3s;
-}
-
-button:hover,select:hover,input:hover{
-background:rgba(255,255,255,0.4);
-}
-
-#content{
-max-width:900px;
-margin:auto;
-padding:20px;
-display:flex;
-flex-direction:column;
-gap:12px;
-}
-
-.box{
-display:flex;
-justify-content:space-between;
-align-items:flex-start;
-padding:16px;
-border-radius:16px;
-background:rgba(255,255,255,0.35);
-backdrop-filter:blur(12px);
-cursor:pointer;
-}
-
-.boxLeft{
-display:flex;
-flex-direction:column;
-flex:1;
-}
-
-.boxTitle{
-font-size:20px;
-font-weight:bold;
-text-align:left;
-}
-
-.boxSnippet{
-font-size:16px;
-color:rgba(0,0,0,0.6);
-font-style:italic;
-line-height:1.3;
-margin-top:4px;
-text-align:left;
-}
-
-.boxButtons{
-display:flex;
-gap:6px;
-}
-
-.fullView h2{
-font-size:28px;
-}
-
-.fullView p{
-white-space:pre-line;
-font-size:20px;
-line-height:1.7;
-}
-
-.presentation p{
-font-size:42px;
-text-align:center;
-line-height:1.8;
-}
-
-.form{
-background:white;
-padding:20px;
-border-radius:16px;
-display:flex;
-flex-direction:column;
-gap:10px;
-}
-
-textarea{
-height:160px;
-resize:vertical;
-}
-
-#search{
-display:none;
-}
+/* ==== SERVICE WORKER ==== */
 </style>
 </head>
-
 <body>
 
 <header>
-
-<h1 onclick="location.reload()">Kirtan Lyrics</h1>
-
-<select id="typeSelect">
-<option value="">Type</option>
-<option value="Kirtan">Kirtan</option>
-<option value="Aarti">Aarti</option>
-<option value="Mantras">Mantras</option>
-<option value="Pooja">Pooja</option>
-<option value="Songs/Ghazals">Songs/Ghazals</option>
-</select>
-
-<select id="subSelect" style="display:none"></select>
-
-<button id="searchBtn">🔍</button>
-<input id="search" placeholder="Search">
-
-<button id="sortBtn">A→Z</button>
-<button id="addBtn">+ Add</button>
-
-<button id="exportBtn">Export</button>
-
-<input type="file" id="importFile" style="display:none">
-<button onclick="document.getElementById('importFile').click()">Import</button>
-
+  <h1 id="pageTitle">Kirtan Lyrics</h1>
+  <div class="headerControls">
+    <nav>
+      <select id="typeSelect">
+        <option value="">Select Type</option>
+        <option value="Aarti">Aarti</option>
+        <option value="Kirtan">Kirtan</option>
+        <option value="Mantras">Mantras</option>
+        <option value="Pooja">Pooja Mantras</option>
+      </select>
+      <select id="subSelect" style="display:none;"></select> 
+      <button id="addLyricsBtn">+ Add Lyrics</button>
+    </nav>
+    <div id="searchContainer">
+      <div id="searchIcon">🔍</div>
+      <input type="text" id="searchInput" placeholder="Search...">
+    </div>
+  </div>
 </header>
-
+<hr>
+<div id="filterContainer">
+  <button id="filterBtn">Sort A → Z</button>
+  <button id="increaseFont">A+</button>
+  <button id="decreaseFont">A-</button>
+</div>
 <div id="content"></div>
 
 <script>
+// === DATA AND STATE ===
+// Your existing `data` object goes here unchanged
 
-/* DATA */
+// === ELEMENTS ===
+const typeSelect = document.getElementById("typeSelect");
+const subSelect = document.getElementById("subSelect");
+const contentDiv = document.getElementById("content");
+const pageTitle = document.getElementById("pageTitle");
+const filterBtn = document.getElementById("filterBtn");
+const increaseFont = document.getElementById("increaseFont");
+const decreaseFont = document.getElementById("decreaseFont");
+let currentType = "", currentSub = "", isAZ=true, lyricFontSize=20;
 
-const defaultData={
-Kirtan:{
-Ram:[],
-Krishna:[
-{title:"Bhajo Radhe Govinda",lyrics:"Bhajo Radhe Govinda\nRadhe Govinda Bhajo",likes:0}
-],
-Shiva:[
-{title:"Shiv Shambho",lyrics:"Shiv Shambho\nShiv Shambho",likes:0}
-]
-},
-Pooja:{},
-Aarti:[],
-Mantras:[],
-"Songs/Ghazals":[]
-};
-
-let data=JSON.parse(localStorage.getItem("kirtanData"))||defaultData;
-
-function saveData(){
-localStorage.setItem("kirtanData",JSON.stringify(data));
+// === FUNCTIONS ===
+// Copy all your existing JS functions from renderBoxes(), renderFullPage(), openEditForm(), openAddForm(), saveEditForm(), saveAddForm(), cancelEditForm(), renderType(), etc.
+// Make sure `renderType()` for Kirtan now correctly sets Deity in subSelect:
+// Example: 
+function renderType(type) {
+  currentType = type.toLowerCase();
+  currentSub = "";
+  filterBtn.style.display = "inline-block";
+  if(currentType==="kirtan") {
+    subSelect.style.display="inline-block";
+    subSelect.innerHTML=`<option value="">Select Deity</option>`;
+    Object.keys(data.Kirtan).forEach(d=>{
+      const opt = document.createElement("option");
+      opt.value=d; opt.textContent=d; subSelect.appendChild(opt);
+    });
+    contentDiv.innerHTML="";
+  } else if(currentType==="pooja") {
+    subSelect.style.display="inline-block";
+    subSelect.innerHTML=`<option value="">Select Pooja</option>`;
+    Object.keys(data.Pooja).forEach(p=>{
+      const opt=document.createElement("option"); opt.value=p; opt.textContent=p; subSelect.appendChild(opt);
+    });
+    contentDiv.innerHTML="";
+  } else {
+    subSelect.style.display="none";
+    if(currentType==="aarti") renderBoxes(data.aarti);
+    else if(currentType==="mantras") renderBoxes(data.mantras);
+  }
 }
 
-const content=document.getElementById("content");
-const search=document.getElementById("search");
-const sortBtn=document.getElementById("sortBtn");
-
-let currentType="Kirtan";
-let currentSub="Krishna";
-let sortAZ=true;
-
-
-/* GET CURRENT ARRAY */
-
-function getCurrentArray(){
-
-if(currentType==="Kirtan"){
-return data.Kirtan[currentSub]||[];
-}
-
-if(currentType==="Pooja"){
-return data.Pooja[currentSub]||[];
-}
-
-if(currentType==="Aarti"){
-return data.Aarti;
-}
-
-if(currentType==="Mantras"){
-return data.Mantras;
-}
-
-if(currentType==="Songs/Ghazals"){
-return data["Songs/Ghazals"];
-}
-
-return[];
-
-}
-
-
-/* RENDER BOXES */
-
-function renderBoxes(arr){
-
-content.innerHTML="";
-
-let list=[...arr];
-
-if(search.value){
-list=list.filter(x=>
-x.title.toLowerCase().includes(search.value.toLowerCase())
-);
-}
-
-list.sort((a,b)=>
-sortAZ
-? a.title.localeCompare(b.title)
-: b.title.localeCompare(a.title)
-);
-
-list.forEach(item=>{
-
-const box=document.createElement("div");
-box.className="box";
-
-const leftDiv=document.createElement("div");
-leftDiv.className="boxLeft";
-
-const titleDiv=document.createElement("div");
-titleDiv.className="boxTitle";
-titleDiv.textContent=item.title;
-
-const snippet=document.createElement("div");
-snippet.className="boxSnippet";
-snippet.textContent=item.lyrics.split("\n").slice(0,2).join(" ");
-
-leftDiv.appendChild(titleDiv);
-leftDiv.appendChild(snippet);
-
-const btnDiv=document.createElement("div");
-btnDiv.className="boxButtons";
-
-const likeBtn=document.createElement("button");
-likeBtn.textContent=`♡${item.likes}`;
-
-likeBtn.onclick=(e)=>{
-e.stopPropagation();
-item.likes++;
-saveData();
-renderBoxes(getCurrentArray());
-};
-
-const editBtn=document.createElement("button");
-editBtn.textContent="✎";
-
-editBtn.onclick=(e)=>{
-e.stopPropagation();
-editItem(item);
-};
-
-btnDiv.appendChild(likeBtn);
-btnDiv.appendChild(editBtn);
-
-box.appendChild(leftDiv);
-box.appendChild(btnDiv);
-
-box.onclick=()=>renderFull(item);
-
-content.appendChild(box);
-
+// === EVENT LISTENERS ===
+typeSelect.addEventListener("change", e => renderType(e.target.value));
+subSelect.addEventListener("change", e => {
+  currentSub = e.target.value;
+  if(currentType==="kirtan") renderBoxes(data.Kirtan[currentSub] || []);
+  else if(currentType==="pooja") renderBoxes(data.Pooja[currentSub] || []);
 });
+filterBtn.addEventListener("click", ()=> { isAZ=!isAZ; filterBtn.textContent=isAZ?"Sort A → Z":"Sort Z → A"; cancelEditForm(); });
+increaseFont.addEventListener("click", ()=> { lyricFontSize += 2; cancelEditForm(); });
+decreaseFont.addEventListener("click", ()=> { lyricFontSize = Math.max(12, lyricFontSize-2); cancelEditForm(); });
+document.getElementById("addLyricsBtn").addEventListener("click", openAddForm);
+document.getElementById("searchIcon").addEventListener("click", ()=> document.getElementById("searchContainer").classList.toggle("active"));
 
+// === OFFLINE SERVICE WORKER REGISTRATION ===
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./service-worker.js').then(()=>console.log("Service Worker Registered")).catch(err=>console.log(err));
 }
-
-
-/* FULL VIEW */
-
-function renderFull(item){
-
-content.innerHTML=`
-<div class="fullView">
-
-<button onclick="goBack()">← Back</button>
-<button onclick="presentationMode('${item.title}','${item.lyrics}')">🎤 Presentation</button>
-
-<h2>${item.title}</h2>
-
-<p>${item.lyrics}</p>
-
-</div>
-`;
-
-}
-
-
-/* PRESENTATION */
-
-function presentationMode(title,lyrics){
-
-content.innerHTML=`
-
-<div class="presentation">
-
-<button onclick="goBack()">← Exit</button>
-
-<h2>${title}</h2>
-
-<p>${lyrics}</p>
-
-</div>
-
-`;
-
-}
-
-
-/* BACK */
-
-function goBack(){
-renderBoxes(getCurrentArray());
-}
-
-
-/* EDIT */
-
-function editItem(item){
-
-content.innerHTML=`
-
-<div class="form">
-
-<input id="editTitle" value="${item.title}">
-
-<textarea id="editLyrics">${item.lyrics}</textarea>
-
-<button onclick="saveEdit('${item.title}')">Save</button>
-
-<button onclick="goBack()">Cancel</button>
-
-</div>
-
-`;
-
-window._editItem=item;
-
-}
-
-
-function saveEdit(title){
-
-let arr=getCurrentArray();
-
-const item=arr.find(x=>x.title===title)||window._editItem;
-
-item.title=document.getElementById("editTitle").value;
-item.lyrics=document.getElementById("editLyrics").value;
-
-saveData();
-
-goBack();
-
-}
-
-
-/* INITIAL LOAD */
-
-renderBoxes(getCurrentArray());
-
 </script>
-
 </body>
 </html>
