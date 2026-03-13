@@ -4,101 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Kirtan Lyrics</title>
-<meta name="description" content="Browse and share beautiful Kirtan, Aarti, and Mantras lyrics. Add, edit, and manage your favorite devotional lyrics.">
-<meta name="theme-color" content="#ffffff">
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
-/* --- RESET & BASE --- */
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: cursive;
-  background-color: #ffffff;
-  color: #000000;
-  padding-top: constant(safe-area-inset-top);
-  padding-top: env(safe-area-inset-top);
+body { font-family: cursive; background-color:#fff; color:#000; margin:0; padding:0; }
+header{ display:flex; justify-content:space-between; align-items:center; padding:20px; flex-wrap:wrap; }
+header h1{ margin:0; font-size:36px; cursor:pointer; }
+nav select, #addLyricsBtn, #filterBtn, #increaseFont, #decreaseFont{ 
+  padding:8px 15px; border-radius:12px; border:1px solid rgba(0,0,0,0.2); background-color: rgba(255,255,255,0.1); backdrop-filter:blur(8px); cursor:pointer; transition: all 0.2s; font-weight:bold;
 }
-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; flex-wrap: wrap; gap:10px; }
-header h1 { margin:0; font-size:36px; cursor:pointer; flex:1 1 auto; min-width:150px; }
-nav { display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
-nav select { margin-left:10px; font-size:16px; padding:8px 12px; border-radius:12px; border:none; background-color:rgba(255,255,255,0.1); backdrop-filter:blur(8px); color:rgb(143,143,143); cursor:pointer; transition: background-color 0.3s, transform 0.2s; }
-nav select:hover, nav select:focus { background-color: rgba(255,255,255,0.2); transform: scale(1.02); outline:none; }
-#searchContainer { display:flex; align-items:center; position:relative; }
-#searchIcon { background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.3); border-radius:14px; padding:10px; cursor:pointer; }
-#searchInput { width:0; opacity:0; margin-left:8px; border:none; border-radius:14px; padding:10px; background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); transition: all 0.3s ease; }
-#searchContainer.active #searchInput { width:180px; opacity:1; }
-
-hr { border:0; height:1px; background-color:white; margin:0 40px 20px 40px; }
-#filterContainer { text-align:right; margin:0 40px 10px 40px; display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
-
-/* --- GLASS STYLE BUTTONS --- */
-#filterBtn, #increaseFont, #decreaseFont, #addLyricsBtn {
-  cursor:pointer;
-  padding:8px 15px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.3);
-  background-color: rgba(255,255,255,0.1);
-  backdrop-filter: blur(8px);
-  color:black;
-  font-weight:bold;
-  transition: all 0.2s ease;
-}
-#filterBtn:hover, #increaseFont:hover, #decreaseFont:hover, #addLyricsBtn:hover {
-  background-color: rgba(255,255,255,0.2);
-  transform: scale(1.05);
-}
-
-#content { display:flex; flex-direction:column; align-items:center; max-width:900px; margin:0 auto; padding:0 20px; }
-
-/* --- BOXES --- */
-.box { background-color: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius:15px; width:100%; padding:15px; margin-bottom:10px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; min-height:80px; transition: transform 0.2s, background-color 0.3s; }
-.box:hover { transform:scale(1.02); background-color: rgba(255,255,255,0.2); }
-.boxTitle { font-weight:bold; font-size:20px; }
-.boxSnippet { font-size:16px; color:lightgray; margin-top:5px; }
-.boxContent { flex-grow:1; cursor:pointer; }
-.boxLikes { flex-shrink:0; text-align:center; padding:0 15px; cursor:default; }
-.likeBtn, .editBtn { background-color: rgba(255,255,255,0.1); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:6px 8px; font-size:14px; transition: background-color 0.2s, transform 0.1s; color:black; cursor:pointer; }
-.likeBtn:hover, .editBtn:hover { background-color: rgba(255,255,255,0.2); transform:scale(1.1); }
-.likeBtn.liked { background-color: rgba(255,100,100,0.2); }
-
-/* --- FULL VIEW --- */
-.fullView h2 { text-align:left; font-size:32px; margin-left:40px; }
-.fullView p { white-space:pre-line; font-size:20px; margin:20px 40px; line-height:1.6; }
-
-/* --- EDIT FORM --- */
-.editForm { background-color: rgba(255,255,255,0.1); backdrop-filter:blur(10px); border-radius:15px; padding:20px; max-width:600px; margin:20px auto; border:1px solid rgba(255,255,255,0.2); }
-.editForm input, .editForm textarea, .editForm select { width:100%; padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.3); background-color: rgba(255,255,255,0.05); color:black; font-family:cursive; font-size:14px; box-sizing:border-box; }
-.editForm textarea { min-height:200px; resize:vertical; }
-.editForm button { background-color: rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); border-radius:8px; padding:10px 15px; margin-right:10px; cursor:pointer; color:black; font-weight:bold; transition: background-color 0.2s; }
-.editForm button:hover { background-color: rgba(255,255,255,0.3); }
+nav select:hover, #addLyricsBtn:hover, #filterBtn:hover, #increaseFont:hover, #decreaseFont:hover{ background-color: rgba(255,255,255,0.2); transform:scale(1.05);}
+#content{max-width:900px;margin:0 auto;padding:20px;}
+.box{background-color: rgba(255,255,255,0.1); backdrop-filter:blur(10px); border-radius:15px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; cursor:pointer;}
+.boxTitle{font-weight:bold; font-size:20px;}
+.boxSnippet{color:gray; margin-top:5px;}
+.likeBtn, .editBtn{padding:5px 8px; margin-left:5px; border-radius:8px; border:1px solid rgba(0,0,0,0.2); background-color:rgba(255,255,255,0.1); cursor:pointer;}
 </style>
 </head>
 <body>
 
 <header>
-  <h1 id="pageTitle">Kirtan Lyrics</h1>
-  <div class="headerControls">
-    <nav>
-      <select id="typeSelect">
-        <option value="">Select Type</option>
-        <option value="aarti">Aarti</option>
-        <option value="kirtan">Kirtan</option>
-        <option value="mantras">Mantras</option>
-        <option value="pooja">Pooja</option>
-      </select>
-      <select id="subSelect" style="display:none;"></select>
-      <button id="addLyricsBtn">+ Add Lyrics</button>
-    </nav>
-    <div id="searchContainer">
-      <div id="searchIcon">🔍</div>
-      <input type="text" id="searchInput" placeholder="Search...">
-    </div>
-  </div>
+<h1>Kirtan Lyrics</h1>
+<nav>
+  <select id="typeSelect">
+    <option value="">Select Type</option>
+    <option value="aarti">Aarti</option>
+    <option value="kirtan">Kirtan</option>
+    <option value="mantras">Mantras</option>
+    <option value="pooja">Pooja</option>
+  </select>
+  <select id="subSelect" style="display:none;"></select>
+  <button id="addLyricsBtn">+ Add Lyrics</button>
+</nav>
 </header>
 
-<hr>
 <div id="filterContainer">
   <button id="filterBtn">Sort A → Z</button>
   <button id="increaseFont">A+</button>
@@ -117,242 +54,83 @@ const data = {
 };
 
 // --- STATE ---
-let currentType = "";
-let currentSub = "";
-let isAZ = true;
-let lyricFontSize = 20;
+let currentType="", currentSub="", isAZ=true, lyricFontSize=20;
 
 // --- ELEMENTS ---
-const typeSelect = document.getElementById("typeSelect");
-const subSelect = document.getElementById("subSelect");
-const contentDiv = document.getElementById("content");
-const pageTitle = document.getElementById("pageTitle");
-const filterBtn = document.getElementById("filterBtn");
-const increaseFont = document.getElementById("increaseFont");
-const decreaseFont = document.getElementById("decreaseFont");
+const typeSelect=document.getElementById("typeSelect");
+const subSelect=document.getElementById("subSelect");
+const contentDiv=document.getElementById("content");
+const addBtn=document.getElementById("addLyricsBtn");
+const filterBtn=document.getElementById("filterBtn");
+const increaseFont=document.getElementById("increaseFont");
+const decreaseFont=document.getElementById("decreaseFont");
 
-// --- RENDER BOXES ---
+// --- FUNCTIONS ---
+function renderSubSelect(type, selectElement){
+  selectElement.innerHTML="";
+  if(type==="kirtan") ["Ram","Krishna","Durga","Shiva","Ganesh","Hanuman","Naam"].forEach(d=>{ const o=document.createElement("option"); o.value=d; o.textContent=d; selectElement.appendChild(o); });
+  else if(type==="pooja") ["Ramayan","Bhagvat Katha","Navratri","Navmi","Shivratri","Janamashtami","Ganesh Chathurthi"].forEach(p=>{ const o=document.createElement("option"); o.value=p; o.textContent=p; selectElement.appendChild(o); });
+}
+
 function renderBoxes(items){
   contentDiv.innerHTML="";
-  let sorted = [...items];
-  sorted.sort((a,b)=>isAZ?a.title.localeCompare(b.title):b.title.localeCompare(a.title));
-  sorted.forEach(item=>{
-    const box = document.createElement("div");
-    box.className="box";
-    const boxContent = document.createElement("div");
-    boxContent.className="boxContent";
-    const title = document.createElement("div");
-    title.className="boxTitle"; title.textContent=item.title;
-    const snippet = document.createElement("div");
-    snippet.className="boxSnippet"; 
-    snippet.style.fontSize = lyricFontSize + "px";
-    snippet.textContent=item.lyrics.split("\n")[0]+(item.lyrics.split("\n")[1]?"...":"");
-    boxContent.appendChild(title); boxContent.appendChild(snippet);
-    boxContent.addEventListener("click", ()=>renderFullPage(item));
-    
-    const boxLikes=document.createElement("div"); boxLikes.className="boxLikes";
-    item.likes=item.likes||0; item.liked=item.liked||false;
-    const likeBtn=document.createElement("button");
-    likeBtn.className="likeBtn"+(item.liked?" liked":""); likeBtn.textContent=item.liked?"❤":"♡";
-    const likeCount=document.createElement("div"); likeCount.className="likeCount"; likeCount.textContent=item.likes;
-    likeBtn.addEventListener("click",(e)=>{e.stopPropagation(); item.liked=!item.liked; item.likes+=item.liked?1:-1; likeBtn.className="likeBtn"+(item.liked?" liked":""); likeBtn.textContent=item.liked?"❤":"♡"; likeCount.textContent=item.likes; });
-    const editBtn=document.createElement("button"); editBtn.className="editBtn"; editBtn.textContent="✏";
-    editBtn.addEventListener("click",(e)=>{ e.stopPropagation(); openEditForm(item); });
-    const boxActions=document.createElement("div"); boxActions.className="boxActions";
-    boxActions.appendChild(likeBtn); boxActions.appendChild(likeCount); boxActions.appendChild(editBtn);
-    box.appendChild(boxContent); box.appendChild(boxActions); contentDiv.appendChild(box);
+  items.sort((a,b)=>isAZ?a.title.localeCompare(b.title):b.title.localeCompare(a.title)).forEach(item=>{
+    const box=document.createElement("div"); box.className="box";
+    const title=document.createElement("div"); title.className="boxTitle"; title.textContent=item.title;
+    const snippet=document.createElement("div"); snippet.className="boxSnippet"; snippet.textContent=item.lyrics.split("\n")[0]+"...";
+    box.appendChild(title); box.appendChild(snippet);
+    contentDiv.appendChild(box);
   });
 }
 
-// --- FULL PAGE ---
-function renderFullPage(item){
-  pageTitle.textContent=item.title;
-  typeSelect.style.display="none"; subSelect.style.display="none"; filterBtn.style.display="none"; document.getElementById("addLyricsBtn").style.display="none";
-  contentDiv.innerHTML=`<div class="fullView"><h2>${item.title}</h2><p style="font-size:${lyricFontSize}px">${item.lyrics}</p></div>`;
-}
-
-// --- EDIT FORM ---
-function openEditForm(item){
-  pageTitle.textContent="Edit Lyrics";
-  typeSelect.style.display="none"; subSelect.style.display="none"; filterBtn.style.display="none"; document.getElementById("addLyricsBtn").style.display="none";
-  let subOptions="";
-  if(currentType==="kirtan") subOptions=Object.keys(data.kirtan).map(d=>`<option value="${d}" ${d===currentSub?"selected":""}>${d}</option>`).join("");
-  else if(currentType==="pooja") subOptions=Object.keys(data.pooja).map(d=>`<option value="${d}" ${d===currentSub?"selected":""}>${d}</option>`).join("");
-  contentDiv.innerHTML=`
-    <div class="editForm">
-      <h2>Edit Lyrics</h2>
-      <input type="text" id="editTitle" placeholder="Lyrics Title" value="${item.title}">
-      <select id="editType">
-        <option value="aarti" ${currentType==="aarti"?"selected":""}>Aarti</option>
-        <option value="kirtan" ${currentType==="kirtan"?"selected":""}>Kirtan</option>
-        <option value="mantras" ${currentType==="mantras"?"selected":""}>Mantras</option>
-        <option value="pooja" ${currentType==="pooja"?"selected":""}>Pooja</option>
-      </select>
-      <select id="editSub">${subOptions}</select>
-      <textarea id="editLyrics">${item.lyrics}</textarea>
-      <button onclick='saveEditForm("${JSON.stringify(item).replace(/'/g,"\\'")}")'>Save</button>
-      <button onclick="cancelEditForm()">Cancel</button>
-    </div>
-  `;
-}
-
-// --- ADD FORM ---
 function openAddForm(){
-  pageTitle.textContent="Add New Lyrics";
-  typeSelect.style.display="none"; subSelect.style.display="none"; filterBtn.style.display="none"; document.getElementById("addLyricsBtn").style.display="none";
   contentDiv.innerHTML=`
-    <div class="editForm">
-      <h2>Add New Lyrics</h2>
-      <input type="text" id="editTitle" placeholder="Lyrics Title">
-      <select id="editType">
-        <option value="aarti">Aarti</option>
-        <option value="kirtan">Kirtan</option>
-        <option value="mantras">Mantras</option>
-        <option value="pooja">Pooja</option>
-      </select>
-      <select id="editSub"></select>
-      <textarea id="editLyrics" placeholder="Lyrics text (one verse per line)"></textarea>
-      <button onclick="saveAddForm()">Save</button>
-      <button onclick="cancelEditForm()">Cancel</button>
-    </div>
+  <div class="editForm">
+    <h2>Add New Lyrics</h2>
+    <input type="text" id="editTitle" placeholder="Title">
+    <select id="editType">
+      <option value="aarti">Aarti</option>
+      <option value="kirtan">Kirtan</option>
+      <option value="mantras">Mantras</option>
+      <option value="pooja">Pooja</option>
+    </select>
+    <select id="editSub"></select>
+    <textarea id="editLyrics" placeholder="Lyrics"></textarea>
+    <button id="saveAddBtn">Save</button>
+  </div>
   `;
-  updateAddSubOptions();
+  const editType=document.getElementById("editType");
+  const editSub=document.getElementById("editSub");
+  renderSubSelect(editType.value, editSub);
+  editType.addEventListener("change", ()=>renderSubSelect(editType.value, editSub));
+  document.getElementById("saveAddBtn").addEventListener("click", ()=>{
+    const t=document.getElementById("editTitle").value;
+    const l=document.getElementById("editLyrics").value;
+    const type=editType.value.toLowerCase();
+    const sub=editSub.value;
+    if(type==="kirtan") data.kirtan[sub].push({title:t, lyrics:l});
+    else if(type==="pooja") data.pooja[sub].push({title:t, lyrics:l});
+    else data[type].push({title:t, lyrics:l});
+    cancelForm();
+  });
 }
 
-// --- HELPER: UPDATE ADD SUB ---
-function updateAddSubOptions(){
-  const type=document.getElementById("editType").value.toLowerCase();
-  const subSelectForm=document.getElementById("editSub");
-  subSelectForm.innerHTML="";
-  if(type==="kirtan") Object.keys(data.kirtan).forEach(d=>{ const o=document.createElement("option"); o.value=d; o.textContent=d; subSelectForm.appendChild(o); });
-  else if(type==="pooja") Object.keys(data.pooja).forEach(d=>{ const o=document.createElement("option"); o.value=d; o.textContent=d; subSelectForm.appendChild(o); });
+function cancelForm(){
+  contentDiv.innerHTML="";
+  typeSelect.value="";
+  subSelect.style.display="none";
 }
 
-// --- SAVE/CANCEL FUNCTIONS ---
-function cancelEditForm(){ 
-  pageTitle.textContent="Kirtan Lyrics"; 
-  typeSelect.style.display="inline-block"; 
-  subSelect.style.display=(currentType==="kirtan"||currentType==="pooja")?"inline-block":"none"; 
-  filterBtn.style.display="inline-block"; 
-  document.getElementById("addLyricsBtn").style.display="inline-block"; 
-  attachAddLyricsBtnListener(); 
-  if(currentType && !currentSub){ 
-    if(currentType==="aarti") renderBoxes(data.aarti); 
-    else if(currentType==="mantras") renderBoxes(data.mantras);
-  } else if(currentType && currentSub){ 
-    if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); 
-    else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); 
-  } else contentDiv.innerHTML=""; 
-}
+// --- EVENTS ---
+addBtn.addEventListener("click", openAddForm);
 
-document.getElementById("addLyricsBtn").addEventListener("click", openAddForm);
-
-// --- TYPE SELECTION ---
-function renderType(type){
-  currentType=type.toLowerCase(); currentSub="";
-  filterBtn.style.display="inline-block";
-  if(currentType==="kirtan"){ 
-    subSelect.style.display="inline-block"; 
-    subSelect.innerHTML=`<option value="">Select Deity</option>`; 
-    ["Ram","Krishna","Durga","Shiva","Ganesh","Hanuman","Naam"].forEach(d=>{ const o=document.createElement("option"); o.value=d; o.textContent=d; subSelect.appendChild(o); }); 
-    contentDiv.innerHTML=""; 
-  } else if(currentType==="pooja"){ 
-    subSelect.style.display="inline-block"; 
-    subSelect.innerHTML=`<option value="">Select Occasion</option>`; 
-    ["Ramayan","Bhagvat Katha","Navratri","Navmi","Shivratri","Janamashtami","Ganesh Chathurthi"].forEach(p=>{ const o=document.createElement("option"); o.value=p; o.textContent=p; subSelect.appendChild(o); }); 
-    contentDiv.innerHTML=""; 
-  } else{ 
-    subSelect.style.display="none"; 
-    if(currentType==="aarti") renderBoxes(data.aarti); 
-    else if(currentType==="mantras") renderBoxes(data.mantras); 
-  }
-}
-
-// --- EVENT LISTENERS ---
-typeSelect.addEventListener("change", e=>renderType(e.target.value));
-subSelect.addEventListener("change", e=>{ 
-  currentSub=e.target.value; 
-  if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); 
-  else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); 
+typeSelect.addEventListener("change", ()=>{
+  currentType=typeSelect.value;
+  if(currentType==="kirtan" || currentType==="pooja"){
+    subSelect.style.display="inline-block";
+    renderSubSelect(currentType, subSelect);
+  } else subSelect.style.display="none";
 });
-filterBtn.addEventListener("click", ()=>{
-  isAZ=!isAZ; filterBtn.textContent=isAZ?"Sort A → Z":"Sort Z → A"; 
-  if(currentType && (!currentSub || currentType==="aarti" || currentType==="mantras")){
-    if(currentType==="aarti") renderBoxes(data.aarti); 
-    else if(currentType==="mantras") renderBoxes(data.mantras); 
-  } else if(currentType && currentSub){
-    if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); 
-    else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); 
-  }
-});
-increaseFont.addEventListener("click", ()=>{
-  lyricFontSize+=2; 
-  if(currentType){
-    if(currentSub){ 
-      if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); 
-      else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); 
-    } else {
-      if(currentType==="aarti") renderBoxes(data.aarti); 
-      else if(currentType==="mantras") renderBoxes(data.mantras); 
-    }
-  }
-});
-decreaseFont.addEventListener("click", ()=>{
-  lyricFontSize-=2; 
-  if(currentType){
-    if(currentSub){ 
-      if(currentType==="kirtan") renderBoxes(data.kirtan[currentSub]||[]); 
-      else if(currentType==="pooja") renderBoxes(data.pooja[currentSub]||[]); 
-    } else {
-      if(currentType==="aarti") renderBoxes(data.aarti); 
-      else if(currentType==="mantras") renderBoxes(data.mantras); 
-    }
-  }
-});
-
-// --- ADD LYRICS BUTTON ---
-function attachAddLyricsBtnListener(){ 
-  document.getElementById("addLyricsBtn").addEventListener("click", openAddForm); 
-}
-attachAddLyricsBtnListener();
-
-// --- UPDATE SUB OPTIONS ON ADD FORM TYPE CHANGE ---
-document.addEventListener("change", e=>{ if(e.target.id==="editType") updateAddSubOptions(); });
-
-// --- SAVE EDIT/ADD ---
-function saveEditForm(itemStr){
-  const item=JSON.parse(itemStr); 
-  const oldTitle = item.title;
-  item.title=document.getElementById("editTitle").value; 
-  item.lyrics=document.getElementById("editLyrics").value; 
-  const newType=document.getElementById("editType").value.toLowerCase(); 
-  const newSub=document.getElementById("editSub").value; 
-  
-  // remove from old place
-  if(currentType==="kirtan") data.kirtan[currentSub]=data.kirtan[currentSub].filter(i=>i.title!==oldTitle);
-  else if(currentType==="pooja") data.pooja[currentSub]=data.pooja[currentSub].filter(i=>i.title!==oldTitle);
-  else data[currentType]=data[currentType].filter(i=>i.title!==oldTitle);
-
-  // add to new place
-  if(newType==="kirtan") data.kirtan[newSub].push(item);
-  else if(newType==="pooja") data.pooja[newSub].push(item);
-  else data[newType].push(item); 
-
-  cancelEditForm(); 
-}
-
-function saveAddForm(){ 
-  const title=document.getElementById("editTitle").value; 
-  const lyrics=document.getElementById("editLyrics").value; 
-  const type=document.getElementById("editType").value.toLowerCase(); 
-  const sub=document.getElementById("editSub").value; 
-  const item={title,lyrics,likes:0,liked:false}; 
-  if(type==="kirtan") data.kirtan[sub].push(item); 
-  else if(type==="pooja") data.pooja[sub].push(item); 
-  else data[type].push(item); 
-  cancelEditForm(); 
-}
 </script>
 </body>
 </html>
-
